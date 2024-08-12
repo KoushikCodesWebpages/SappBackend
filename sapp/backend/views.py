@@ -7,6 +7,9 @@ from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 
+from .utils import BaseDBView
+from .models import Assignment
+
 
 class SignUp(APIView):
     def post(self, request):
@@ -26,3 +29,7 @@ class Login(APIView):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AssignmentView(BaseDBView):
+    model = Assignment
