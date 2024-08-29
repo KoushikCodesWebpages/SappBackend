@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/login/',Login.as_view(),name='login'),
     path('api/signup/',SignUp.as_view(),name='signup'),
     path('assignments/', AssignmentView.as_view(), name='assignment-list'),
-    path('assignments/<int:index>/', AssignmentView.as_view({'get': 'get_by_index'}),name='assignment-depth'),
+    # URL for getting, updating, and deleting an assignment by its index (id)
+    path('assignments/<int:index>/', AssignmentView.as_view(), name='assignment-detail'),
     
 ]
