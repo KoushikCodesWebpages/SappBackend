@@ -6,12 +6,19 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+    
 
 from .utils import BaseDBView
 from .models import Assignment
 
 
+
+
+
 class SignUp(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -19,17 +26,18 @@ class SignUp(APIView):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 class Login(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        username = request.data.get('email')
+        email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=email, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response({'error': 'Invalid Credentials or New User, Please Sign Up'}, status=status.HTTP_400_BAD_REQUEST)
 
 class AssignmentView(BaseDBView):
     model = Assignment
