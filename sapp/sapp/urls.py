@@ -21,6 +21,13 @@ from backend.views import SignUp,Login,AssignmentView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/',Login.as_view(),name='login'),
+    
+    #http://localhost:8000/api/login/
+    #{
+    #"email": "hariniwork@gmail.com",
+    #"password": "your_password"
+    #}
+
     path('api/signup/',SignUp.as_view(),name='signup'),
     path('assignments/', AssignmentView.as_view(), name='assignment-list'),
     # URL for getting, updating, and deleting an assignment by its index (id)
