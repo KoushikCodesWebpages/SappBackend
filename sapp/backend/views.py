@@ -7,14 +7,8 @@ from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
-    
-
 from .utils import BaseDBView
 from .models import Assignment
-
-
-
-
 
 class SignUp(APIView):
     permission_classes = [AllowAny]
