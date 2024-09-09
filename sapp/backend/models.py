@@ -18,8 +18,11 @@ class BaseDBModel(models.Model):
 
 # Then, for each database, you can create a model that inherits from BaseDBModel
 class Assignment(BaseDBModel):
-    # Add any additional fields specific to the Assignment database
-    pass
+    # Add fields for class and section
+    due_date = models.DateField(null=True, blank=True)  # Assignment due date
+    assigned_by = models.CharField(max_length=255)  # Teacher who assigned it
+    class_name = models.CharField(max_length=50)  # Class (e.g., 10th, 12th, etc.)
+    section = models.CharField(max_length=5)  # Section (e.g., A, B, C)
 '''
 class Report(BaseDBModel):
     # Add any additional fields specific to the Report database

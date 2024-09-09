@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from .utils import BaseDBView
 from .models import Assignment
+from .pagination import AssignmentPagination
 
 class SignUp(APIView):
     permission_classes = [AllowAny]
@@ -34,4 +35,5 @@ class Login(APIView):
         return Response({'error': 'Invalid Credentials or New User, Please Sign Up'}, status=status.HTTP_400_BAD_REQUEST)
 
 class AssignmentView(BaseDBView):
-    model = Assignment
+    model_class = Assignment
+    pagination_class = AssignmentPagination
