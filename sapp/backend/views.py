@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,8 +8,9 @@ from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from .utils import BaseDBView
-from .models import Assignment
-from .pagination import AssignmentPagination
+from .serializers import StudentsProfileSerializer, FacultyProfileSerializer
+from .models import StudentsProfile, FacultyProfile
+from .pagination import CustomPagination
 
 class SignUp(APIView):
     permission_classes = [AllowAny]
@@ -34,6 +35,18 @@ class Login(APIView):
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid Credentials or New User, Please Sign Up'}, status=status.HTTP_400_BAD_REQUEST)
 
-class AssignmentView(BaseDBView):
-    model_class = Assignment
-    pagination_class = AssignmentPagination
+    
+class StudentsProfileView(BaseDBView):
+    model_class = StudentsProfile
+    serializer_class = StudentsProfileSerializer
+    permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+  # Only authenticated users can access this view
+
+# View for handling FacultyProfile API requests
+class FacultyProfileView(BaseDBView):
+    model_class = FacultyProfile
+    serializer_class = FacultyProfileSerializer
+    permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+  # Only authenticated users can access this view

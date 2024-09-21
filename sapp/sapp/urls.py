@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from backend.views import SignUp,Login,AssignmentView
+from backend.views import SignUp,Login,StudentsProfileView,FacultyProfileView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,8 +29,10 @@ urlpatterns = [
     #}
 
     path('api/signup/',SignUp.as_view(),name='signup'),
-    path('assignments/', AssignmentView.as_view(), name='assignment-list'),
-    # URL for getting, updating, and deleting an assignment by its index (id)
-    path('assignments/<int:index>/', AssignmentView.as_view(), name='assignment-detail'),
     
+    path('student-profile/', StudentsProfileView.as_view(), name='student-profile-list'),
+    path('student-profile/<int:index>/', StudentsProfileView.as_view(), name='student-profile-detail'),
+
+    path('faculty-profile/', FacultyProfileView.as_view(), name='faculty-profile-list'),
+    path('faculty-profile/<int:index>/', FacultyProfileView.as_view(), name='faculty-profile-detail'),
 ]
