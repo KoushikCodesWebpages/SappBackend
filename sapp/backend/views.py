@@ -37,12 +37,12 @@ class Login(APIView):
 class StudentsProfileView(BaseDBView):
     model_class = StudentsDB
     serializer_class = StudentsDBSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+    permission_classes = [AllowAny]  # Only authenticated users can access this view
     pagination_class = CustomPagination
 
 
 class FacultyProfileView(BaseDBView):
     model_class = FacultyDB
     serializer_class = FacultyDBSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+    permission_classes = [AllowAny]  # Only authenticated users can access this view
     pagination_class = CustomPagination

@@ -1,38 +1,29 @@
-"""
-URL configuration for sapp project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
-from backend.views import SignUp,Login,StudentsProfileView,FacultyProfileView
+from backend.views import SignUp, Login, StudentsProfileView, FacultyProfileView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
+    # Admin panel
     path('admin/', admin.site.urls),
-    path('api/login/',Login.as_view(),name='login'),
     
+    # Authentication
+    path('api/login/', Login.as_view(), name='login'),
+    path('api/signup/', SignUp.as_view(), name='signup'),
     #http://localhost:8000/api/login/
     #{
     #"email": "hariniwork@gmail.com",
     #"password": "your_password"
     #}
+    # Student profile API
+    path('api/student-profile/', StudentsProfileView.as_view(), name='student-profile-list'),
+    path('api/student-profile/<int:index>/', StudentsProfileView.as_view(), name='student-profile-detail'),
 
-    path('api/signup/',SignUp.as_view(),name='signup'),
-    
-    path('student-profile/', StudentsProfileView.as_view(), name='student-profile-list'),
-    path('student-profile/<int:index>/', StudentsProfileView.as_view(), name='student-profile-detail'),
-
-    path('faculty-profile/', FacultyProfileView.as_view(), name='faculty-profile-list'),
-    path('faculty-profile/<int:index>/', FacultyProfileView.as_view(), name='faculty-profile-detail'),
+    # Faculty profile API
+    path('api/faculty-profile/', FacultyProfileView.as_view(), name='faculty-profile-list'),
+    path('api/faculty-profile/<int:index>/', FacultyProfileView.as_view(), name='faculty-profile-detail'),
 ]
+
+# Serving media files in development
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
