@@ -1,5 +1,6 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from .models import StudentsDB, FacultyDB, Standard, Section
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, allow_blank=False)
@@ -10,10 +11,49 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
     def create(self, validated_data):
-        # Create a new user using the validated data
         user = User.objects.create_user(
             username=validated_data['email'],  # Set email as the username
             email=validated_data['email'],
             password=validated_data['password'],
         )
         return user
+
+
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
+        fields = ['id', 'name']
+
+
+class SectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ['id', 'name']
+
+
+class StudentsDBSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = StudentsDB
+        fields = ['id', 'user', 'image', 'standard', 'section']
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
+        student = StudentsDB.objects.create(user=user, **validated_data)
+        return student
+
+
+class FacultyDBSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = FacultyDB
+        fields = ['id', 'user', 'image', 'name', 'address', 'reg_no', 'role']
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = UserSerializer.create(UserSerializer(), validated_data=user_data)
+        faculty = FacultyDB.objects.create(user=user, **validated_data)
+        return faculty
