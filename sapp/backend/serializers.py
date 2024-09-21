@@ -25,32 +25,26 @@ class StandardSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class SectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Section
-        fields = ['id', 'name']
 class StudentsDBSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = StudentsDB
-        fields = ['id', 'user', 'image', 'standard', 'section']
+        fields = ['id', 'user', 'image', 'standard', 'section', 'title', 'description']  # Add title and description
 
     def update(self, instance, validated_data):
-        # Handle user data
         user_data = validated_data.pop('user', None)
         if user_data:
             user_serializer = UserSerializer(instance.user, data=user_data)
             user_serializer.is_valid(raise_exception=True)
             user_serializer.save()
 
-        # Update all fields of the StudentsDB instance
+        # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
         
         return instance
-
 
 
 class FacultyDBSerializer(serializers.ModelSerializer):
