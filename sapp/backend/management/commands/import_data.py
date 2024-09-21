@@ -1,21 +1,15 @@
-import csv
 from django.core.management.base import BaseCommand
-from backend.models import Standard
+from backend.importers.csv_importer import import_csv_to_model
 
 class Command(BaseCommand):
-    help = 'Import standards from a CSV file'
+    help = 'Import data from a CSV file into the specified model'
+
+    def add_arguments(self, parser):
+        parser.add_argument('model_name', type=str, help='Name of the model to import data into')
+        parser.add_argument('csv_file', type=str, help='Path to the CSV file to import')
 
     def handle(self, *args, **kwargs):
-        csv_file_path = 'data\standards.csv'  # Update with the path to your CSV file
-        try:
-            with open(csv_file_path, mode='r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    standard_name = row['name']
-                    if not Standard.objects.filter(name=standard_name).exists():
-                        Standard.objects.create(name=standard_name)
-                        self.stdout.write(self.style.SUCCESS(f'Standard "{standard_name}" created'))
-                    else:
-                        self.stdout.write(self.style.WARNING(f'Standard "{standard_name}" already exists'))
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+        model_name = kwargs['model_name']
+        csv_file_path = kwargs['csv_file']
+
+        import_csv_to_model(model_name, csv_file_path)

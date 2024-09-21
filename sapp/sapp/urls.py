@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views import SignUp, Login, StudentsProfileView, FacultyProfileView, StandardListView
+from backend.views import SignUp, Login, StudentsProfileView, FacultyProfileView, StandardListView,SectionListView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -27,6 +27,7 @@ urlpatterns = [
     
     #Exposed APIs
      path('api/standards/', StandardListView.as_view(), name='standard-list'),
+       path('api/sections/', SectionListView.as_view(), name='section-list'),
 ]
 
 # Serving media files in development

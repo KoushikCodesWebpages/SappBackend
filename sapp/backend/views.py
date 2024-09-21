@@ -51,7 +51,7 @@ class FacultyProfileView(BaseDBView):
 # Exposed APIs
 
 from rest_framework.generics import ListAPIView
-from backend.models import Standard
+from backend.models import Standard,  Section
 from rest_framework import serializers
 
 class StandardSerializer(serializers.ModelSerializer):
@@ -62,4 +62,16 @@ class StandardSerializer(serializers.ModelSerializer):
 class StandardListView(ListAPIView):
     queryset = Standard.objects.all()
     serializer_class = StandardSerializer
+    permission_classes = [AllowAny]
+    
+# Section Serializer
+class SectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ['id', 'name']
+
+# Section List View
+class SectionListView(ListAPIView):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
     permission_classes = [AllowAny]
