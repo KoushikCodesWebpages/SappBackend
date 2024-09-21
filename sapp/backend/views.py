@@ -1,16 +1,13 @@
 from django.contrib.auth import authenticate
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from .serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
-from .utils import BaseDBView
-from .serializers import StudentsProfileSerializer, FacultyProfileSerializer
-from .models import StudentsProfile, FacultyProfile
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .serializers import UserSerializer, StudentsDBSerializer, FacultyDBSerializer
+from .models import StudentsDB, FacultyDB
 from .pagination import CustomPagination
+from .utils import BaseDBView
 
 class SignUp(APIView):
     permission_classes = [AllowAny]
@@ -19,9 +16,10 @@ class SignUp(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class Login(APIView):
     permission_classes = [AllowAny]
@@ -31,22 +29,20 @@ class Login(APIView):
         password = request.data.get('password')
         user = authenticate(username=email, password=password)
         if user:
-            token, created = Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid Credentials or New User, Please Sign Up'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Invalid credentials or new user, please sign up.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
 class StudentsProfileView(BaseDBView):
-    model_class = StudentsProfile
-    serializer_class = StudentsProfileSerializer
-    permission_classes = [AllowAny]
+    model_class = StudentsDB
+    serializer_class = StudentsDBSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
     pagination_class = CustomPagination
-  # Only authenticated users can access this view
 
-# View for handling FacultyProfile API requests
+
 class FacultyProfileView(BaseDBView):
-    model_class = FacultyProfile
-    serializer_class = FacultyProfileSerializer
-    permission_classes = [AllowAny]
+    model_class = FacultyDB
+    serializer_class = FacultyDBSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
     pagination_class = CustomPagination
-  # Only authenticated users can access this view
