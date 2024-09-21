@@ -46,3 +46,20 @@ class FacultyProfileView(BaseDBView):
     serializer_class = FacultyDBSerializer
     permission_classes = [AllowAny]  # Only authenticated users can access this view
     pagination_class = CustomPagination
+
+
+# Exposed APIs
+
+from rest_framework.generics import ListAPIView
+from backend.models import Standard
+from rest_framework import serializers
+
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
+        fields = ['id', 'name']
+
+class StandardListView(ListAPIView):
+    queryset = Standard.objects.all()
+    serializer_class = StandardSerializer
+    permission_classes = [AllowAny]
