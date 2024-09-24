@@ -56,3 +56,5 @@ class FacultyDB(ProfileBase):
 
     def __str__(self):
         return f"Faculty Profile: {self.name}"
+    
+    
