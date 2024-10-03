@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..serializers.serializers import UserSerializer, StudentsDBSerializer, FacultyDBSerializer
 from ..models.models import StudentsDB, FacultyDB
-from ..pagination import CustomPagination
+from ..utils.pagination import CustomPagination
 from ..utils.utils import BaseDBView
 from django.shortcuts import render, get_object_or_404
 

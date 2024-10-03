@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from ..models.models import StudentsDB, FacultyDB, Standard, Section
+from models.base_models import Standard, Section
+from models.user_models import FacultyDB, StudentsDB
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, allow_blank=False)
