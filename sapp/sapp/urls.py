@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views.auth_views import SignUp, Login
+from backend.views.auth_views import SignUpView, LoginView
 from backend.views.users_views import StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
 from django.conf import settings
 from django.conf.urls.static import static
@@ -11,10 +11,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Authentication
-    path('api/login/', Login.as_view(), name='login'),
-    path('api/signup/', SignUp.as_view(), name='signup'),
+    path('api/login/', LoginView.as_view(), name='login'),
+    path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/profile/', ProfileAPI.as_view(), name='student_profile_api'),
-     path('api/signup/', SignUp.as_view(), name='signup'),
+     path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/profile/', ProfileAPI.as_view(), name='profile'),
