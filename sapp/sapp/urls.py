@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views.auth_views import SignUpView, LoginView
+from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView
 from backend.views.users_views import StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
 from django.conf import settings
 from django.conf.urls.static import static
@@ -17,6 +17,9 @@ urlpatterns = [
      path('api/signup/', SignUpView.as_view(), name='signup'),
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('verify-email/<uidb64>/<token>/', VerifyEmailView.as_view(), name='verify_email'),
+     path('api/password_reset/', PasswordResetRequestView.as_view(), name='password_reset'),
+    path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
     path('api/profile/', ProfileAPI.as_view(), name='profile'),
     #http://localhost:8000/api/login/
     #{
