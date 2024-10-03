@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.tokens import default_token_generator
 from backend.serializers.auth_serializers import PasswordResetRequestSerializer,SetNewPasswordSerializer
-
+from rest_framework.permissions import AllowAny
 
 # views.py
 
@@ -47,6 +47,7 @@ class PasswordResetConfirmView(APIView):
 User = get_user_model()
 
 class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -80,6 +81,7 @@ class PasswordResetRequestView(APIView):
 
 
 class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, uidb64, token):
         try:
             # Decode the uid and retrieve the user
@@ -119,6 +121,7 @@ class VerifyEmailView(APIView):
 User = get_user_model()
 
 class SignUpView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
@@ -152,6 +155,7 @@ class SignUpView(APIView):
 # accounts/views.py
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         # Extracting email and password from the request body
         email = request.data.get('email')
