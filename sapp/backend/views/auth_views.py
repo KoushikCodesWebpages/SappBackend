@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from serializers.user_serializers import UserSerializer
+from backend.serializers.user_serializers import UserSerializer
 
 class SignUp(APIView):
     permission_classes = [AllowAny]

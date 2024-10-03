@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from models.base_models import ProfileBase, Standard, Section
+from backend.models.base_models import ProfileBase, Standard, Section
 
 class StudentsDB(ProfileBase):
     """A model for storing student-specific profile information."""

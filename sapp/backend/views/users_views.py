@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer
-from models.user_models import StudentsDB, FacultyDB
-from utils.pagination import CustomPagination
-from utils.utils import BaseDBView
+from backend.serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer
+from backend.models.user_models import StudentsDB, FacultyDB
+from backend.utils.pagination import CustomPagination
+from backend.utils.utils import BaseDBView
 from django.shortcuts import get_object_or_404
 
 
@@ -67,7 +67,7 @@ class ProfileAPI(APIView):
 # Exposed APIs
 
 from rest_framework.generics import ListAPIView
-from models.user_models import Standard,  Section
+from backend.models.user_models import Standard,  Section
 from rest_framework import serializers
 
 class StandardSerializer(serializers.ModelSerializer):
