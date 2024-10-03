@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views.views import SignUp, Login, StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
+from backend.views.auth_views import SignUp, Login
+from backend.views.users_views import StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
