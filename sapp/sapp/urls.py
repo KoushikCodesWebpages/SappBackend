@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views import SignUp, Login, StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
+from backend.views.views import SignUp, Login, StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     # Admin panel
@@ -12,6 +13,10 @@ urlpatterns = [
     path('api/login/', Login.as_view(), name='login'),
     path('api/signup/', SignUp.as_view(), name='signup'),
     path('api/profile/', ProfileAPI.as_view(), name='student_profile_api'),
+     path('api/signup/', SignUp.as_view(), name='signup'),
+    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/profile/', ProfileAPI.as_view(), name='profile'),
     #http://localhost:8000/api/login/
     #{
     #"email": "hariniwork@gmail.com",

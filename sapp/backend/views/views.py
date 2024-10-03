@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import UserSerializer, StudentsDBSerializer, FacultyDBSerializer
-from .models import StudentsDB, FacultyDB
-from .pagination import CustomPagination
-from .utils import BaseDBView
+from ..serializers.serializers import UserSerializer, StudentsDBSerializer, FacultyDBSerializer
+from ..models.models import StudentsDB, FacultyDB
+from ..pagination import CustomPagination
+from ..utils.utils import BaseDBView
 from django.shortcuts import render, get_object_or_404
 
 class SignUp(APIView):
@@ -92,7 +92,7 @@ class ProfileAPI(APIView):
 # Exposed APIs
 
 from rest_framework.generics import ListAPIView
-from backend.models import Standard,  Section
+from sapp.backend.models.models import Standard,  Section
 from rest_framework import serializers
 
 class StandardSerializer(serializers.ModelSerializer):

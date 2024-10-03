@@ -6,7 +6,7 @@ from django.db.models import Q
 
 class BaseDBView(APIView):
     model_class = None
-    serializer_class = None
+    serializer_class = None 
     pagination_class = None  # Set this in your child classes if needed
 
     def post(self, request, index=None):

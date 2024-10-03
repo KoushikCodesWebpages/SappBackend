@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -83,14 +85,13 @@ WSGI_APPLICATION = 'sapp.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',# Enable token authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Default to require authentication
     ],
     'DEFAULT_PAGINATION_CLASS': 'backend.pagination.CustomPagination',  # Custom pagination class if defined
-    'PAGE_SIZE': 10, 
+    'PAGE_SIZE': 10,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',  # Enable filtering
     ],
@@ -99,6 +100,13 @@ REST_FRAMEWORK = {
     ],
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token will expire in 60 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),      # Refresh token lasts 1 day
+    'ROTATE_REFRESH_TOKENS': True,                    # Rotate refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,                  # Blacklist old refresh tokens
+    'AUTH_HEADER_TYPES': ('Bearer',),                  # Define the authorization header type
+}
 
 
 # Database
