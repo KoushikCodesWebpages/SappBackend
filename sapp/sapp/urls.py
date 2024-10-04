@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
-from backend.views.users_views import StudentsProfileView, FacultyProfileView, StandardListView,SectionListView, ProfileAPI
+from backend.views.users_views import StudentsDbView, FacultyDbView, StandardListView,SectionListView, ProfileAPI
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -29,12 +29,12 @@ urlpatterns = [
     #}
     path('api/profile/', ProfileAPI.as_view(), name='student_profile_api'),
     # Student profile API
-    path('api/student-profile/', StudentsProfileView.as_view(), name='student-profile-list'),
-    path('api/student-profile/<int:index>/', StudentsProfileView.as_view(), name='student-profile-detail'),
+    path('api/student-profile/', StudentsDbView.as_view(), name='student-profile-list'),
+    path('api/student-profile/<int:index>/', StudentsDbView.as_view(), name='student-profile-detail'),
 
     # Faculty profile API
-    path('api/faculty-profile/', FacultyProfileView.as_view(), name='faculty-profile-list'),
-    path('api/faculty-profile/<int:index>/', FacultyProfileView.as_view(), name='faculty-profile-detail'),
+    path('api/faculty-profile/', FacultyDbView.as_view(), name='faculty-profile-list'),
+    path('api/faculty-profile/<int:index>/', FacultyDbView.as_view(), name='faculty-profile-detail'),
     
     
     #Exposed APIs

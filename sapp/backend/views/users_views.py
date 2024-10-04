@@ -10,14 +10,14 @@ from backend.utils.base_view import BaseDBView
 from django.shortcuts import get_object_or_404
 
 
-class StudentsProfileView(BaseDBView):
+class StudentsDbView(BaseDBView):
     model_class = StudentsDB
     serializer_class = StudentsDBSerializer
     permission_classes = [AllowAny]  # Only authenticated users can access this view
     pagination_class = CustomPagination
 
 
-class FacultyProfileView(BaseDBView):
+class FacultyDbView(BaseDBView):
     model_class = FacultyDB
     serializer_class = FacultyDBSerializer
     permission_classes = [AllowAny]  # Only authenticated users can access this view
