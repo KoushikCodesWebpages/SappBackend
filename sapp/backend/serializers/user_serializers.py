@@ -39,7 +39,7 @@ class SectionSerializer(serializers.ModelSerializer):
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
-        fields = ['id', 'name']
+        fields = ['subject_id', 'name']
 
 
 # Updated StudentsDBSerializer

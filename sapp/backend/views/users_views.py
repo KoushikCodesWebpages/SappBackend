@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from backend.serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer
 from backend.models.user_models import StudentsDB, FacultyDB
-from backend.utils.pagination import CustomPagination
+from backend.utils.pagination import CustomPagination, SectionPagination, StandardPagination,SubjectPagination
 from backend.utils.base_view import BaseDBView
 from django.shortcuts import get_object_or_404
 
@@ -73,13 +73,13 @@ from backend.serializers.user_serializers import StandardSerializer, SectionSeri
 class StandardView(BaseDBView):
     model_class = Standard
     serializer_class = StandardSerializer
-    pagination_class = CustomPagination
+    pagination_class = StandardPagination
     permission_classes = [AllowAny]
     
 class SubjectView(BaseDBView):
     model_class = Subject
     serializer_class = SubjectSerializer
-    pagination_class = CustomPagination
+    pagination_class = SubjectPagination
     permission_classes = [AllowAny]
 
 class SectionView(BaseDBView):
