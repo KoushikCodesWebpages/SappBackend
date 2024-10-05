@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
-from backend.views.users_views import StudentsDbView, FacultyDbView, StandardListView,SectionListView, ProfileAPI, SubjectListView
+from backend.views.users_views import StudentsDbView, FacultyDbView, StandardView,SectionView, ProfileAPI, SubjectView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -38,9 +38,17 @@ urlpatterns = [
     
     
     #Exposed APIs
-    path('api/standards/', StandardListView.as_view(), name='standard-list'),
-    path('api/sections/', SectionListView.as_view(), name='section-list'),
-     path('subjects/', SubjectListView.as_view(), name='subject-list'),
+    # Subject URLs
+    path('api/subjects/', SubjectView.as_view(), name='subject-list-create'),  # Handle GET and POST
+    path('api/subjects/<int:index>/', SubjectView.as_view(), name='subject-detail'),  # Handle GET, PUT (update), and DELETE
+
+    # Standard URLs
+    path('api/standards/', StandardView.as_view(), name='standard-list-create'),  # Handle GET and POST
+    path('api/standards/<int:index>/', StandardView.as_view(), name='standard-detail'),  # Handle GET, PUT (update), and DELETE
+
+    # Section URLs
+    path('api/sections/', SectionView.as_view(), name='section-list-create'),  # Handle GET and POST
+    path('api/sections/<int:index>/', SectionView.as_view(), name='section-detail'),  # Handle GET, PUT (update), and DELETE
 ]
 
 # Serving media files in development

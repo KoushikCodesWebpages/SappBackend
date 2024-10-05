@@ -66,22 +66,24 @@ class ProfileAPI(APIView):
 
 # Exposed APIs
 
-from rest_framework.generics import ListAPIView
 from backend.models.user_models import Standard,  Section, Subject
 from backend.serializers.user_serializers import StandardSerializer, SectionSerializer,SubjectSerializer
 
 
-class StandardListView(ListAPIView):
-    queryset = Standard.objects.all()
+class StandardView(BaseDBView):
+    model_class = Standard
     serializer_class = StandardSerializer
+    pagination_class = CustomPagination
     permission_classes = [AllowAny]
     
-class SubjectListView(ListAPIView):
-    queryset = Subject.objects.all()
+class SubjectView(BaseDBView):
+    model_class = Subject
     serializer_class = SubjectSerializer
+    pagination_class = CustomPagination
     permission_classes = [AllowAny]
 
-class SectionListView(ListAPIView):
-    queryset = Section.objects.all()
+class SectionView(BaseDBView):
+    model_class = Section
     serializer_class = SectionSerializer
+    pagination_class = CustomPagination
     permission_classes = [AllowAny]
