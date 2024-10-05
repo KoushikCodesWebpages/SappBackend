@@ -25,20 +25,47 @@ class PasswordResetRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError("No user with this email found.")
         return value
 
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from backend.models.user_models import StudentsDB, FacultyDB, Section, Standard
+
+User = get_user_model()
 class SignUpSerializer(serializers.ModelSerializer):
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('faculty', 'Faculty')
+    ]
+    role = serializers.ChoiceField(choices=ROLE_CHOICES)  # Adding a role field
     password = serializers.CharField(write_only=True)
+
+    # Adding fields for standard and section
+    standard = serializers.PrimaryKeyRelatedField(queryset=Standard.objects.all(), required=False)  # Assuming Standard is a model
+    section = serializers.PrimaryKeyRelatedField(queryset=Section.objects.all(), required=False)  # Assuming Section is a model
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'password', 'role', 'standard', 'section']  # Adding role to the fields
 
     def create(self, validated_data):
+        # Extract role from validated data
+        role = validated_data.pop('role')
+        standard = validated_data.pop('standard', None)  # Handle standard
+        section = validated_data.pop('section', None)    # Handle section
+
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password']
         )
+
+        # Create an entry in StudentsDB or FacultyDB based on the role
+        if role == 'student':
+            student_profile = StudentsDB.objects.create(user=user, standard=standard, section=section)  # Pass the standard and section
+        elif role == 'faculty':
+            faculty_profile = FacultyDB.objects.create(user=user)  # Add additional fields if necessary
+
         return user
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()

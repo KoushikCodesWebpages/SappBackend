@@ -67,26 +67,20 @@ class ProfileAPI(APIView):
 # Exposed APIs
 
 from rest_framework.generics import ListAPIView
-from backend.models.user_models import Standard,  Section
-from rest_framework import serializers
+from backend.models.user_models import Standard,  Section, Subject
+from backend.serializers.user_serializers import StandardSerializer, SectionSerializer,SubjectSerializer
 
-class StandardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Standard
-        fields = ['id', 'name']
 
 class StandardListView(ListAPIView):
     queryset = Standard.objects.all()
     serializer_class = StandardSerializer
     permission_classes = [AllowAny]
     
-# Section Serializer
-class SectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Section
-        fields = ['id', 'name']
+class SubjectListView(ListAPIView):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+    permission_classes = [AllowAny]
 
-# Section List View
 class SectionListView(ListAPIView):
     queryset = Section.objects.all()
     serializer_class = SectionSerializer

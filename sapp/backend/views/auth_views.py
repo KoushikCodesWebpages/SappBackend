@@ -18,6 +18,7 @@ from backend.serializers.auth_serializers import PasswordResetRequestSerializer,
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.contrib.auth import authenticate
+from backend.models.user_models import StudentsDB, FacultyDB,  Section, Standard
 
 # views.py
 
@@ -121,12 +122,13 @@ class VerifyEmailView(APIView):
 
 
 User = get_user_model()
-
 class SignUpView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
+            # Create user
             user = serializer.save()
             user.is_active = False  # Deactivate account until email verification
             user.save()
@@ -149,10 +151,32 @@ class SignUpView(APIView):
                 fail_silently=False,
             )
 
+            # Based on role, create student or faculty profile
+            role = request.data.get('role')  # Get role from the request
+            if role == 'student':
+                standard_id = request.data.get('standard')  # Get standard ID from the request
+                section_id = request.data.get('section')  # Get section ID from the request
+                standard = Standard.objects.get(id=standard_id)
+                section = Section.objects.get(id=section_id)
+                # Create a student profile
+                StudentsDB.objects.create(user=user, standard=standard, section=section)
+
+            elif role == 'faculty':
+                section_id = request.data.get('section')  # Get section ID from the request (optional)
+                section = Section.objects.get(id=section_id) if section_id else None
+                # Create a faculty profile
+                FacultyDB.objects.create(
+                    user=user,
+                    name=request.data.get('name'),
+                    address=request.data.get('address'),
+                    reg_no=request.data.get('reg_no'),
+                    role=request.data.get('role'),
+                    section=section
+                )
+
             return Response({'message': 'Verification email sent'}, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     
 # accounts/views.py
 
@@ -162,6 +186,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+
+User = get_user_model()
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -188,9 +214,17 @@ class LoginView(APIView):
                 access_token = AccessToken.for_user(user)
                 refresh_token = RefreshToken.for_user(user)
 
+                # Determine if the user is a student or faculty
+                role = 'student' if StudentsDB.objects.filter(user=user).exists() else 'faculty' if FacultyDB.objects.filter(user=user).exists() else None
+
+                if role is None:
+                    return Response({'error': 'User has no associated role'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Return tokens and role
                 return Response({
                     'access': str(access_token),
                     'refresh': str(refresh_token),
+                    'role': role,
                 }, status=status.HTTP_200_OK)
             else:
                 # User is not active (email not verified)
@@ -198,7 +232,7 @@ class LoginView(APIView):
         else:
             # Invalid password
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-        
+     
         
 class LogoutView(APIView):
     permission_classes = [AllowAny]

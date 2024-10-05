@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
-from backend.views.users_views import StudentsDbView, FacultyDbView, StandardListView,SectionListView, ProfileAPI
+from backend.views.users_views import StudentsDbView, FacultyDbView, StandardListView,SectionListView, ProfileAPI, SubjectListView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -38,8 +38,9 @@ urlpatterns = [
     
     
     #Exposed APIs
-     path('api/standards/', StandardListView.as_view(), name='standard-list'),
-       path('api/sections/', SectionListView.as_view(), name='section-list'),
+    path('api/standards/', StandardListView.as_view(), name='standard-list'),
+    path('api/sections/', SectionListView.as_view(), name='section-list'),
+     path('subjects/', SubjectListView.as_view(), name='subject-list'),
 ]
 
 # Serving media files in development
