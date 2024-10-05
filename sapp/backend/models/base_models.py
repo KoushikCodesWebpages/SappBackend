@@ -32,12 +32,15 @@ class Standard(models.Model):
 
 
 class Section(models.Model):
+    section_id = models.CharField(max_length=1, primary_key=True)
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
     
 class Subject(models.Model):
+    
+    subject_id = models.CharField(max_length=10, primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):

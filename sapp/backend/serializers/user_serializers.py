@@ -32,7 +32,7 @@ class StandardSerializer(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['id', 'name']
+        fields = ['section_id', 'name']
 
 
 # SubjectSerializer for handling subjects in FacultyDBSerializer
