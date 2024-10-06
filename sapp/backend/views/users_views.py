@@ -1,15 +1,12 @@
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from backend.serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer , ProfileSerializer , StandardSerializer, SectionSerializer, SubjectSerializer
 from backend.models.user_models import StudentsDB, FacultyDB
 from backend.utils.pagination import CustomPagination, SectionPagination, StandardPagination,SubjectPagination
 from backend.utils.base_view import BaseDBView
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import NotFound
+
 
 
 class StudentsDbView(BaseDBView):
