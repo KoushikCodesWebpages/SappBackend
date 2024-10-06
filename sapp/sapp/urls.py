@@ -28,13 +28,13 @@ urlpatterns = [
     #"password": "your_password"
     #}
     path('api/profile/', ProfileAPI.as_view(), name='student_profile_api'),
-    # Student profile API
-    path('api/student-profile/', StudentsDbView.as_view(), name='student-profile-list'),
-    path('api/student-profile/<int:index>/', StudentsDbView.as_view(), name='student-profile-detail'),
+    # Studentdb API
+    path('api/student-db/', StudentsDbView.as_view(), name='student-list'),
+    path('api/student-db/<int:index>/', StudentsDbView.as_view(), name='student-detail'),
 
-    # Faculty profile API
-    path('api/faculty-profile/', FacultyDbView.as_view(), name='faculty-profile-list'),
-    path('api/faculty-profile/<int:index>/', FacultyDbView.as_view(), name='faculty-profile-detail'),
+    # Facultydb API
+    path('api/faculty-db/', FacultyDbView.as_view(), name='faculty-list'),
+    path('api/faculty-db/<int:index>/', FacultyDbView.as_view(), name='faculty-detail'),
     
     
     #Exposed APIs

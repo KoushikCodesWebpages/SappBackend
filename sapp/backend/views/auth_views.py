@@ -122,6 +122,7 @@ class VerifyEmailView(APIView):
 
 
 User = get_user_model()
+
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
@@ -147,32 +148,9 @@ class SignUpView(APIView):
                 'Verify Your Email Address',
                 f'Hi {user.username},\nPlease click the link to verify your email:\n{verification_link}',
                 'CharityHubForDemo@gmail.com',  # Replace with your email
-                [user.email],
+                [user.email],   
                 fail_silently=False,
             )
-
-            # Based on role, create student or faculty profile
-            role = request.data.get('role')  # Get role from the request
-            if role == 'student':
-                standard_id = request.data.get('standard')  # Get standard ID from the request
-                section_id = request.data.get('section')  # Get section ID from the request
-                standard = Standard.objects.get(id=standard_id)
-                section = Section.objects.get(id=section_id)
-                # Create a student profile
-                StudentsDB.objects.create(user=user, standard=standard, section=section)
-
-            elif role == 'faculty':
-                section_id = request.data.get('section')  # Get section ID from the request (optional)
-                section = Section.objects.get(id=section_id) if section_id else None
-                # Create a faculty profile
-                FacultyDB.objects.create(
-                    user=user,
-                    name=request.data.get('name'),
-                    address=request.data.get('address'),
-                    reg_no=request.data.get('reg_no'),
-                    role=request.data.get('role'),
-                    section=section
-                )
 
             return Response({'message': 'Verification email sent'}, status=status.HTTP_201_CREATED)
 

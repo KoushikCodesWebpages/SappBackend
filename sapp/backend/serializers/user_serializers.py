@@ -43,14 +43,20 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 # Updated StudentsDBSerializer
+from rest_framework import serializers
+
 class StudentsDBSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     standard = StandardSerializer()  # Nested serializer for standard
     section = SectionSerializer()    # Nested serializer for section
+    title = serializers.SerializerMethodField()  # Use SerializerMethodField to get the username
 
     class Meta:
         model = StudentsDB
-        fields = ['id', 'user', 'image', 'standard', 'section', 'title', 'description']  # Add title and description
+        fields = ['id', 'user', 'image', 'standard', 'section', 'title', 'description']  # Ensure all relevant fields are included
+
+    def get_title(self, obj):
+        return obj.user.username  # Return the username as the title
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
@@ -63,12 +69,14 @@ class StudentsDBSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
+
         return instance
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user = UserSerializer.create(UserSerializer(), validated_data=user_data)
+
+        # Create the student instance
         student = StudentsDB.objects.create(user=user, **validated_data)
         return student
 
@@ -81,7 +89,7 @@ class FacultyDBSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FacultyDB
-        fields = ['id', 'user', 'image', 'name', 'address', 'reg_no', 'role', 'section', 'subjects']  # Include section and subjects
+        fields = ['id', 'user', 'image', 'name', 'address', 'reg_no', 'role', 'section', 'subject']  # Include section and subjects
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
