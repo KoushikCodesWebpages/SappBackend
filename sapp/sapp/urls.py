@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
-from backend.views.users_views import StudentsDbView, FacultyDbView, StandardView,SectionView, ProfileAPI, SubjectView
+from backend.views.users_views import StudentsDbView, FacultyDbView, StandardView,SectionView, ProfileView, SubjectView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -19,15 +19,11 @@ urlpatterns = [
     path('verify-email/<uidb64>/<token>/', VerifyEmailView.as_view(), name='verify_email'),
     path('api/password_reset/', PasswordResetRequestView.as_view(), name='password_reset'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
-    
-    
-    path('api/profile/', ProfileAPI.as_view(), name='profile'),
     #http://localhost:8000/api/login/
     #{
     #"email": "hariniwork@gmail.com",
     #"password": "your_password"
     #}
-    path('api/profile/', ProfileAPI.as_view(), name='student_profile_api'),
     # Studentdb API
     path('api/student-db/', StudentsDbView.as_view(), name='student-list'),
     path('api/student-db/<int:index>/', StudentsDbView.as_view(), name='student-detail'),
@@ -36,7 +32,10 @@ urlpatterns = [
     path('api/faculty-db/', FacultyDbView.as_view(), name='faculty-list'),
     path('api/faculty-db/<int:index>/', FacultyDbView.as_view(), name='faculty-detail'),
     
+    #Profile api
     
+      path('api/profile/', ProfileView.as_view(), name='profile'),
+      
     #Exposed APIs
     # Subject URLs
     path('api/subjects/', SubjectView.as_view(), name='subject-list-create'),  # Handle GET and POST

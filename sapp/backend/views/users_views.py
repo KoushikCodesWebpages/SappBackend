@@ -1,13 +1,15 @@
 from rest_framework import status
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from backend.serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer
+from backend.serializers.user_serializers import StudentsDBSerializer, FacultyDBSerializer, UserSerializer , ProfileSerializer , StandardSerializer, SectionSerializer, SubjectSerializer
 from backend.models.user_models import StudentsDB, FacultyDB
 from backend.utils.pagination import CustomPagination, SectionPagination, StandardPagination,SubjectPagination
 from backend.utils.base_view import BaseDBView
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
 
 
 class StudentsDbView(BaseDBView):
@@ -24,44 +26,61 @@ class FacultyDbView(BaseDBView):
     pagination_class = CustomPagination
     
 
-class ProfileAPI(APIView):
-    permission_classes = [AllowAny]  # Ensure the user is logged in
+class ProfileSerializer(serializers.Serializer):
+    user = UserSerializer()
+    image = serializers.ImageField(required=False)
+    standard = StandardSerializer(required=False)
+    section = SectionSerializer(required=False)
+    title = serializers.CharField(max_length=255)
+    description = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        # Add any custom validation if needed
+        return attrs
+
+class ProfileView(BaseDBView):
+    serializer_class = ProfileSerializer  # Use ProfileSerializer
+
+    def get_user_profile(self, user):
+        """Fetch the user profile based on user type."""
+        if hasattr(user, 'studentsdb'):
+            return StudentsDB.objects.get(user=user), StudentsDB
+        elif hasattr(user, 'facultydb'):
+            return FacultyDB.objects.get(user=user), FacultyDB
+        else:
+            raise ValueError("User profile not found.")
 
     def get(self, request):
-        # Get the logged-in user
-        user = request.user
+        try:
+            profile, model_class = self.get_user_profile(request.user)
+            serializer = self.serializer_class(profile)
+            return Response(serializer.data)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-        # Fetch the student profile associated with the logged-in user
-        student_profile = get_object_or_404(StudentsDB, user=user)
+    def patch(self, request):
+        try:
+            profile, model_class = self.get_user_profile(request.user)
+            serializer = self.serializer_class(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-        # Serialize the student data
-        serializer = StudentsDBSerializer(student_profile)
+    def put(self, request):
+        try:
+            profile, model_class = self.get_user_profile(request.user)
+            serializer = self.serializer_class(profile, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-        # Return the serialized data in the response
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        # Get the logged-in user
-        user = request.user
-
-        # Check if the student profile already exists, otherwise create one
-        student_profile, created = StudentsDB.objects.get_or_create(user=user)
-
-        # Serialize the incoming data for validation and saving
-        serializer = StudentsDBSerializer(student_profile, data=request.data, partial=True)
-
-        # Check if the data is valid
-        if serializer.is_valid():
-            # Save the updated student profile
-            serializer.save()
-
-            # Return the updated or created student profile data
-            return Response(serializer.data, status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED)
-        
-        # If the data is not valid, return a 400 Bad Request with errors
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
     
 
 # Exposed APIs

@@ -44,7 +44,6 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 # Updated StudentsDBSerializer
 from rest_framework import serializers
-
 class StudentsDBSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     standard = StandardSerializer()  # Nested serializer for standard
@@ -73,11 +72,16 @@ class StudentsDBSerializer(serializers.ModelSerializer):
         return instance
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop('user')  # Pop user data from the validated data
         user = UserSerializer.create(UserSerializer(), validated_data=user_data)
 
-        # Create the student instance
+        # Create the student instance with the user instance
         student = StudentsDB.objects.create(user=user, **validated_data)
+        
+        # Set the title to the username and save
+        student.title = user.username  
+        student.save()  # Save the student instance to persist the title
+
         return student
 
 
@@ -126,3 +130,38 @@ class FacultyDBSerializer(serializers.ModelSerializer):
                 instance.subjects.add(subject_obj)
 
         return instance
+    
+    
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    standard = StandardSerializer(required=False)
+    section = SectionSerializer(required=False)
+    title = serializers.CharField(source='title', required=False)  # Directly map to the title field in the model
+    description = serializers.CharField(required=False)
+
+    class Meta:
+        fields = ['id', 'user', 'image', 'standard', 'section', 'title', 'description']
+
+    def update(self, instance, validated_data):
+        # Determine whether the instance is a student or faculty
+        if isinstance(instance, StudentsDB):
+            self.Meta.model = StudentsDB
+        elif isinstance(instance, FacultyDB):
+            self.Meta.model = FacultyDB
+        else:
+            raise serializers.ValidationError("Invalid instance type.")
+
+        # Update user details
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            user_serializer = UserSerializer(instance.user, data=user_data)
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
+
+        # Update other fields in the instance
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
