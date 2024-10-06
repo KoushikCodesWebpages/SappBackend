@@ -16,6 +16,9 @@ from django.http import HttpResponse
 from django.contrib.auth.tokens import default_token_generator
 from backend.serializers.auth_serializers import PasswordResetRequestSerializer,SetNewPasswordSerializer
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from django.contrib.auth import authenticate
+from backend.models.user_models import StudentsDB, FacultyDB,  Section, Standard
 
 # views.py
 
@@ -122,9 +125,11 @@ User = get_user_model()
 
 class SignUpView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
+            # Create user
             user = serializer.save()
             user.is_active = False  # Deactivate account until email verification
             user.save()
@@ -143,19 +148,28 @@ class SignUpView(APIView):
                 'Verify Your Email Address',
                 f'Hi {user.username},\nPlease click the link to verify your email:\n{verification_link}',
                 'CharityHubForDemo@gmail.com',  # Replace with your email
-                [user.email],
+                [user.email],   
                 fail_silently=False,
             )
 
             return Response({'message': 'Verification email sent'}, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     
 # accounts/views.py
 
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+
+User = get_user_model()
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         # Extracting email and password from the request body
         email = request.data.get('email')
@@ -169,19 +183,47 @@ class LoginView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({'error': 'Invalid email or password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check the password directly
+        # Check if the password is correct
         if user.check_password(password):
             if user.is_active:
-                # User is authenticated and active
-                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+                # User is authenticated and active, generate tokens
+                access_token = AccessToken.for_user(user)
+                refresh_token = RefreshToken.for_user(user)
+
+                # Determine if the user is a student or faculty
+                role = 'student' if StudentsDB.objects.filter(user=user).exists() else 'faculty' if FacultyDB.objects.filter(user=user).exists() else None
+
+                if role is None:
+                    return Response({'error': 'User has no associated role'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Return tokens and role
+                return Response({
+                    'access': str(access_token),
+                    'refresh': str(refresh_token),
+                    'role': role,
+                }, status=status.HTTP_200_OK)
             else:
-                # User is not active (not verified)
+                # User is not active (email not verified)
                 return Response({'error': 'Email not verified'}, status=status.HTTP_403_FORBIDDEN)
         else:
-            # Authentication failed
-            return Response({'error': 'Invalid email or password'}, status=status.HTTP_400_BAD_REQUEST)
+            # Invalid password
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+     
+        
+class LogoutView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
+        try:
+            # Get the refresh token from the request data
+            refresh_token = request.data.get('refresh_token')
+            token = RefreshToken(refresh_token)
 
+            # Blacklist the refresh token
+            token.blacklist()
 
+            return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

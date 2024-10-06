@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'rest_framework_simplejwt'
+
 ]
 
 MIDDLEWARE = [
@@ -91,7 +92,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',  # Default to require authentication
     ],
     'DEFAULT_PAGINATION_CLASS': 'backend.utils.pagination.CustomPagination',  # Custom pagination class if defined
-    'PAGE_SIZE': 10,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',  # Enable filtering
     ],
