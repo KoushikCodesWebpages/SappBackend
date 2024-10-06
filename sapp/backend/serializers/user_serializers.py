@@ -132,36 +132,7 @@ class FacultyDBSerializer(serializers.ModelSerializer):
         return instance
     
     
-class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    standard = StandardSerializer(required=False)
-    section = SectionSerializer(required=False)
-    title = serializers.CharField(source='title', required=False)  # Directly map to the title field in the model
-    description = serializers.CharField(required=False)
-
-    class Meta:
-        fields = ['id', 'user', 'image', 'standard', 'section', 'title', 'description']
-
-    def update(self, instance, validated_data):
-        # Determine whether the instance is a student or faculty
-        if isinstance(instance, StudentsDB):
-            self.Meta.model = StudentsDB
-        elif isinstance(instance, FacultyDB):
-            self.Meta.model = FacultyDB
-        else:
-            raise serializers.ValidationError("Invalid instance type.")
-
-        # Update user details
-        user_data = validated_data.pop('user', None)
-        if user_data:
-            user_serializer = UserSerializer(instance.user, data=user_data)
-            user_serializer.is_valid(raise_exception=True)
-            user_serializer.save()
-
-        # Update other fields in the instance
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        return instance
+class ProfileSerializer(serializers.Serializer):
+    student_profile = StudentsDBSerializer(required=False)  # Optional field for student profile
+    faculty_profile = FacultyDBSerializer(required=False)  # Optional field for faculty profile
 

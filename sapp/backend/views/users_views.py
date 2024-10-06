@@ -39,46 +39,45 @@ class ProfileSerializer(serializers.Serializer):
         return attrs
 
 class ProfileView(BaseDBView):
-    serializer_class = ProfileSerializer  # Use ProfileSerializer
-
-    def get_user_profile(self, user):
-        """Fetch the user profile based on user type."""
-        if hasattr(user, 'studentsdb'):
-            return StudentsDB.objects.get(user=user), StudentsDB
-        elif hasattr(user, 'facultydb'):
-            return FacultyDB.objects.get(user=user), FacultyDB
-        else:
-            raise ValueError("User profile not found.")
+    serializer_class = ProfileSerializer  # Using ProfileSerializer for reading user profile
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+        profile_data = {}
+
+        # Fetch student profile
         try:
-            profile, model_class = self.get_user_profile(request.user)
-            serializer = self.serializer_class(profile)
-            return Response(serializer.data)
-        except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            student = StudentsDB.objects.get(user=user)
+            profile_data['student_profile'] = StudentsDBSerializer(student).data
+        except StudentsDB.DoesNotExist:
+            profile_data['student_profile'] = None
+
+        # Fetch faculty profile (not included in the response)
+        try:
+            faculty = FacultyDB.objects.get(user=user)  # Optional logic for faculty
+        except FacultyDB.DoesNotExist:
+            pass  # Do nothing if faculty doesn't exist
+
+        return Response(profile_data)
 
     def patch(self, request):
-        try:
-            profile, model_class = self.get_user_profile(request.user)
-            serializer = self.serializer_class(profile, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        user = request.user
+        profile_data = {}
 
-    def put(self, request):
+        # Update student profile if it exists
         try:
-            profile, model_class = self.get_user_profile(request.user)
-            serializer = self.serializer_class(profile, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            student = StudentsDB.objects.get(user=user)
+            student_serializer = StudentsDBSerializer(student, data=request.data, partial=True)
+            if student_serializer.is_valid(raise_exception=True):
+                student_serializer.save()
+                profile_data['student_profile'] = student_serializer.data
+            else:
+                return Response(student_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except StudentsDB.DoesNotExist:
+            return Response({"error": "Student profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(profile_data)
 
 
     
