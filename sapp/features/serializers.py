@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from rest_framework import serializers
+
+
 from accounts.serializers import UserSerializer 
 from students.serializers import StudentsDBSerializer
 from faculties.serializers import FacultyDBSerializer
