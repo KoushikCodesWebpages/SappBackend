@@ -6,7 +6,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from students.models import StudentsDB
 from faculties.models import FacultyDB
-from accounts.models import Section, Standard
+from accounts.models import Section, Standard, Subject
 
 
 User = get_user_model()
@@ -99,3 +99,40 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError("No user with this email found.")
         return value
+    
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True, allow_blank=False)
+    password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
+
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['email'],  # Set email as the username
+            email=validated_data['email'],
+            password=validated_data['password'],
+        )
+        return user
+
+
+# StandardSerializer remains unchanged
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
+        fields = ['id', 'name']
+
+
+# SectionSerializer for section field in faculty and student models
+class SectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ['section_id', 'name']
+
+
+# SubjectSerializer for handling subjects in FacultyDBSerializer
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ['subject_id', 'name']
