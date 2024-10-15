@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Default to require authentication
     ],
-    'DEFAULT_PAGINATION_CLASS': 'backend.utils.pagination.CustomPagination',  # Custom pagination class if defined
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.CustomPagination',  # Custom pagination class if defined
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',  # Enable filtering
     ],
