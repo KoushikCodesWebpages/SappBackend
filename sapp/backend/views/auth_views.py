@@ -28,6 +28,79 @@ from rest_framework.permissions import AllowAny
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            embedded_html = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Reset Your Password</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        margin: 20px;
+                        padding: 20px;
+                        background-color: #f4f4f4;
+                    }}
+                    h1 {{
+                        color: #333;
+                    }}
+                    form {{
+                        background: #fff;
+                        padding: 20px;
+                        border-radius: 5px;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    }}
+                    label {{
+                        display: block;
+                        margin-bottom: 8px;
+                    }}
+                    input[type="password"] {{
+                        width: 100%;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                    }}
+                    button {{
+                        padding: 10px 15px;
+                        background-color: #5cb85c;
+                        color: #fff;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    }}
+                    button:hover {{
+                        background-color: #4cae4c;
+                    }}
+                </style>
+            </head>
+            <body>
+                <h1>Reset Your Password</h1>
+                <form method="POST" action="/reset-password-confirm/{uidb64}/{token}/">
+                    <input type="hidden" name="uid" value="{uidb64}">
+                    <input type="hidden" name="token" value="{token}">
+                    <label for="password">New Password:</label>
+                    <input type="password" name="password" required>
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" name="confirm_password" required>
+                    <button type="submit">Reset Password</button>
+                </form>
+            </body>
+            </html>
+            """
+            return Response(embedded_html, content_type='text/html')
+        else:
+            return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
+
     def post(self, request, uidb64, token):
         serializer = SetNewPasswordSerializer(data=request.data)
         if serializer.is_valid():
