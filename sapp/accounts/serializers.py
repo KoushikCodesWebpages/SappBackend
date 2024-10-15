@@ -1,33 +1,13 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework import serializers
 from django.contrib.auth.models import User
-
-class SetNewPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(min_length=8)
-    confirm_password = serializers.CharField(min_length=8)
-
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError("Passwords do not match.")
-        return attrs
-
-class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-    def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("No user with this email found.")
-        return value
-
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from backend.models.user_models import StudentsDB, FacultyDB, Section, Standard
+from students.models import StudentsDB
+from faculties.models import FacultyDB
+from accounts.models import Section, Standard
+
 
 User = get_user_model()
 
@@ -81,8 +61,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             FacultyDB.objects.create(user=user)  # Include additional fields if needed
         
         return user
-
-
+    
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -103,3 +82,20 @@ class LoginSerializer(serializers.Serializer):
         return {
             'username': user.username,  # You can return other user info if needed
         }
+        
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=8)
+    confirm_password = serializers.CharField(min_length=8)
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        return attrs
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No user with this email found.")
+        return value

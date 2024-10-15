@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from sapp.utils.base_model import BaseDBModel
+from general.utils.base_model import BaseDBModel
 # Create your models here.
 
 
