@@ -3,9 +3,10 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+
+from accounts.models import Section, Standard
 from students.models import StudentsDB
 from faculties.models import FacultyDB
-from accounts.models import Section, Standard
 
 User = get_user_model()
 

@@ -1,27 +1,28 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.mail import send_mail
-from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes,force_str
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
-from accounts.serializers import SignUpSerializer, LoginSerializer,PasswordResetRequestSerializer,SetNewPasswordSerializer
-from general.utils.tokens import email_verification_token
 from accounts.models import  Section, Standard
 from students.models import StudentsDB
 from faculties.models import FacultyDB
+
+from accounts.serializers import SignUpSerializer,PasswordResetRequestSerializer,SetNewPasswordSerializer
+
+from general.utils.tokens import email_verification_token
+
 
 
 User = get_user_model()

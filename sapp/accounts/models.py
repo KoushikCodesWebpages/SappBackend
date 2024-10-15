@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from general.utils.base_model import BaseDBModel
-# Create your models here.
 
+from general.utils.base_model import BaseDBModel
 
 class ProfileBase(BaseDBModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
