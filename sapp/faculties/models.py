@@ -1,5 +1,6 @@
 from django.db import models
-from accounts.models import ProfileBase, Standard, Section, Subject
+
+from accounts.models import ProfileBase, Section, Subject
 
 class FacultyDB(ProfileBase):
     """A model for storing faculty-specific profile information."""

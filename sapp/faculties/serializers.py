@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from rest_framework import serializers
+
 from accounts.models import Subject
 from faculties.models import FacultyDB
-from accounts.serializers import UserSerializer, SectionSerializer, SubjectSerializer
+
+from accounts.serializers import UserSerializer
+from exposed.serializers import SectionSerializer , SubjectSerializer
 
 
 class FacultyDBSerializer(serializers.ModelSerializer):
