@@ -1,13 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from students.models import StudentsDB
 from faculties.models import FacultyDB
-from accounts.models import Section, Standard, Subject
-
+from accounts.models import Section, Standard
 
 User = get_user_model()
 
@@ -117,22 +115,4 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-# StandardSerializer remains unchanged
-class StandardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Standard
-        fields = ['id', 'name']
 
-
-# SectionSerializer for section field in faculty and student models
-class SectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Section
-        fields = ['section_id', 'name']
-
-
-# SubjectSerializer for handling subjects in FacultyDBSerializer
-class SubjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subject
-        fields = ['subject_id', 'name']
