@@ -42,7 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'backend',
+    'accounts',
+    'students',
+    'faculties',
+    'features',
+    'exposed',
+    'general',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -69,7 +74,7 @@ ROOT_URLCONF = 'sapp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'accounts/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,7 +96,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Default to require authentication
     ],
-    'DEFAULT_PAGINATION_CLASS': 'backend.utils.pagination.CustomPagination',  # Custom pagination class if defined
+    'DEFAULT_PAGINATION_CLASS': 'general.utils.pagination.CustomPagination',  # Custom pagination class if defined
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',  # Enable filtering
     ],
