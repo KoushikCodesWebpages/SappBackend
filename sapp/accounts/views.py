@@ -209,7 +209,7 @@ class PasswordResetConfirmView(APIView):
                 'uidb64': uidb64,
                 'token': token
             }
-            return render(request, 'accounts/templates/password_reset_confirm.html', context)
+            return render(request, 'password_reset_confirm.html', context)
         else:
             return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -225,7 +225,15 @@ class PasswordResetConfirmView(APIView):
             if user is not None and default_token_generator.check_token(user, token):
                 user.set_password(serializer.validated_data['password'])
                 user.save()
-                return Response({'message': 'Password has been reset successfully'}, status=status.HTTP_200_OK)
+                return HttpResponse('''
+                    <html>
+                        <head><title>Password Reset</title></head>
+                        <body>
+                            <h1>Password has been successfully reset Successfully</h1>
+                            <p>You can now log in to your account with the new password.</p>
+                        </body>
+                    </html>
+                ''')
             else:
                 return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
 
