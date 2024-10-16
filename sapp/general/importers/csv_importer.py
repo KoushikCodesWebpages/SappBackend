@@ -1,20 +1,36 @@
-import csv
-from django.apps import apps
+# importer/csv_importer.py
 
-def import_csv_to_model(model_name, csv_file_path):
-    try:
-        # Get the model class from the provided model name
-        model = apps.get_model('backend', model_name)
+import csv
+
+def import_csv_to_model(model, csv_file_path):
+    """
+    Imports data from a CSV file into the specified model.
+    
+    Args:
+        model: The Django model class where data will be imported.
+        csv_file_path: The path to the CSV file.
         
-        with open(csv_file_path, mode='r') as file:
-            reader = csv.DictReader(file)
+    Returns:
+        A summary of how many records were created and skipped.
+    """
+    created_count = 0
+    skipped_count = 0
+
+    try:
+        with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
             for row in reader:
-                # Adjust this based on the fields of the specific model
-                fields = {field: value for field, value in row.items() if value}
-                if not model.objects.filter(**fields).exists():
-                    model.objects.create(**fields)
-                    print(f'{model_name} created with data: {fields}')
+                # Attempt to create a new object or skip if it already exists
+                obj, created = model.objects.get_or_create(**row)
+                if created:
+                    created_count += 1
                 else:
-                    print(f'{model_name} already exists with data: {fields}')
+                    skipped_count += 1
+
+    except FileNotFoundError:
+        raise FileNotFoundError(f'CSV file "{csv_file_path}" not found.')
+
     except Exception as e:
-        print(f'Error: {str(e)}')
+        raise Exception(f'Error while importing CSV: {str(e)}')
+
+    return created_count, skipped_count

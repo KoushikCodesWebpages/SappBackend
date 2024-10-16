@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes,force_str
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
@@ -204,68 +204,12 @@ class PasswordResetConfirmView(APIView):
             user = None
 
         if user is not None and default_token_generator.check_token(user, token):
-            embedded_html = f"""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Reset Your Password</title>
-                <style>
-                    body {{
-                        font-family: Arial, sans-serif;
-                        margin: 20px;
-                        padding: 20px;
-                        background-color: #f4f4f4;
-                    }}
-                    h1 {{
-                        color: #333;
-                    }}
-                    form {{
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 5px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    }}
-                    label {{
-                        display: block;
-                        margin-bottom: 8px;
-                    }}
-                    input[type="password"] {{
-                        width: 100%;
-                        padding: 10px;
-                        margin-bottom: 15px;
-                        border: 1px solid #ccc;
-                        border-radius: 5px;
-                    }}
-                    button {{
-                        padding: 10px 15px;
-                        background-color: #5cb85c;
-                        color: #fff;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    }}
-                    button:hover {{
-                        background-color: #4cae4c;
-                    }}
-                </style>
-            </head>
-            <body>
-                <h1>Reset Your Password</h1>
-                <form method="POST" action="/reset-password-confirm/{uidb64}/{token}/">
-                    <input type="hidden" name="uid" value="{uidb64}">
-                    <input type="hidden" name="token" value="{token}">
-                    <label for="password">New Password:</label>
-                    <input type="password" name="password" required>
-                    <label for="confirm_password">Confirm Password:</label>
-                    <input type="password" name="confirm_password" required>
-                    <button type="submit">Reset Password</button>
-                </form>
-            </body>
-            </html>
-            """
-            return Response(embedded_html, content_type='text/html')
+            # Render the password reset template with context
+            context = {
+                'uidb64': uidb64,
+                'token': token
+            }
+            return render(request, 'accounts/templates/password_reset_confirm.html', context)
         else:
             return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from backend.views.auth_views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
-from backend.views.users_views import StudentsDbView, FacultyDbView, StandardView,SectionView, ProfileView, SubjectView
+from accounts.views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
+from students.views import StudentsDbView
+from faculties.views import FacultyDbView
+from exposed.views import StandardView,SectionView, SubjectView
+from features.views import ProfileView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
