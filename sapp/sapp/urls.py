@@ -37,7 +37,7 @@ urlpatterns = [
     
     #Profile api
     
-      path('api/profile/', ProfileView.as_view(), name='profile'),
+    path('api/profile/', ProfileView.as_view(), name='profile'),
       
     #Exposed APIs
     # Subject URLs
