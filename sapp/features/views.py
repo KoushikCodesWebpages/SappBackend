@@ -13,8 +13,19 @@ from features.serializers import ProfileSerializer
 from .serializers import AssignmentSerializer, ResultSerializer, ReportSerializer, FeeSerializer, AttendanceSerializer, TimetableSerializer, CalendarEventSerializer
 
 from general.utils.base_view import BaseDBView
+    
+from rest_framework.exceptions import PermissionDenied
 
+def restrict_non_get_for_students(request):
+    """
+    Restrict non-GET requests for students.
+    """
+    user = request.user
+    # If the user is a student and the request method is not GET
+    if hasattr(user, 'student_profile') and request.method != 'GET':
+        raise PermissionDenied("Students are only allowed to perform GET requests.")
 
+    
 class ProfileView(BaseDBView):
     serializer_class = ProfileSerializer  # Using ProfileSerializer for reading user profile
     permission_classes = [IsAuthenticated]
@@ -60,8 +71,14 @@ class ProfileView(BaseDBView):
 class AssignmentView(BaseDBView):
     model_class = Assignment
     serializer_class = AssignmentSerializer
-    pagination_class = None  # Optionally add pagination
+    pagination_class = None
     permission_classes = [IsAuthenticated]
+
+    def dispatch(self, request, *args, **kwargs):
+        # Restrict non-GET requests for students
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
 
 class ResultView(BaseDBView):
     model_class = Result
@@ -69,11 +86,21 @@ class ResultView(BaseDBView):
     pagination_class = None
     permission_classes = [IsAuthenticated]
 
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
+
 class ReportView(BaseDBView):
     model_class = Report
     serializer_class = ReportSerializer
     pagination_class = None
     permission_classes = [IsAuthenticated]
+
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
 
 class FeeView(BaseDBView):
     model_class = Fee
@@ -81,11 +108,21 @@ class FeeView(BaseDBView):
     pagination_class = None
     permission_classes = [IsAuthenticated]
 
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
+
 class AttendanceView(BaseDBView):
     model_class = Attendance
     serializer_class = AttendanceSerializer
     pagination_class = None
     permission_classes = [IsAuthenticated]
+
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
 
 class TimetableView(BaseDBView):
     model_class = Timetable
@@ -93,9 +130,19 @@ class TimetableView(BaseDBView):
     pagination_class = None
     permission_classes = [IsAuthenticated]
 
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
+
 class CalendarEventView(BaseDBView):
     model_class = CalendarEvent
     serializer_class = CalendarEventSerializer
     pagination_class = None
-    
+    permission_classes = [IsAuthenticated]
+
+    def dispatch(self, request, *args, **kwargs):
+        restrict_non_get_for_students(request)
+        return super().dispatch(request, *args, **kwargs)
+
     
