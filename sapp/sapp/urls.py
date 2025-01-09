@@ -41,13 +41,13 @@ urlpatterns = [
     
     path('api/profile/', ProfileView.as_view(), name='profile'),
     
-    path('assignments/', AssignmentView.as_view(), name='assignments'),
-    path('results/', ResultView.as_view(), name='results'),
-    path('reports/', ReportView.as_view(), name='reports'),
-    path('fees/', FeeView.as_view(), name='fees'),
-    path('attendance/', AttendanceView.as_view(), name='attendance'),
-    path('timetable/', TimetableView.as_view(), name='timetable'),
-    path('calendar/', CalendarEventView.as_view(), name='calendar'),  
+    path('api/assignments/', AssignmentView.as_view(), name='assignments'),
+    path('api/results/', ResultView.as_view(), name='results'),
+    path('api/reports/', ReportView.as_view(), name='reports'),
+    path('api/fees/', FeeView.as_view(), name='fees'),
+    path('api/attendance/', AttendanceView.as_view(), name='attendance'),
+    path('api/timetable/', TimetableView.as_view(), name='timetable'),
+    path('api/calendar/', CalendarEventView.as_view(), name='calendar'),  
       
       
       

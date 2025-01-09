@@ -15,11 +15,12 @@ class Notification(models.Model):
 
 
 class Assignment(models.Model):
-    student = models.ForeignKey(User, related_name='assignments', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
+    subject = models.CharField(max_length=100)
     due_date = models.DateField()
     submitted_on = models.DateField(null=True, blank=True)
+    class_name = models.CharField(max_length=100)
 
     def __str__(self):
         return f"Assignment for {self.student.username}: {self.title}"
