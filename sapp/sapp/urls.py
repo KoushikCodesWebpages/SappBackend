@@ -1,10 +1,12 @@
-from django.contrib import admin
-from django.urls import path
 from accounts.views import SignUpView, LoginView,VerifyEmailView, PasswordResetConfirmView,PasswordResetRequestView, LogoutView
 from students.views import StudentsDbView
 from faculties.views import FacultyDbView
 from exposed.views import StandardView,SectionView, SubjectView
-from features.views import ProfileView
+from features.views import ProfileView, AssignmentView, ResultView, ReportView, FeeView, AttendanceView, TimetableView, CalendarEventView
+
+
+from django.contrib import admin
+from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -38,6 +40,19 @@ urlpatterns = [
     #Profile api
     
     path('api/profile/', ProfileView.as_view(), name='profile'),
+    
+    path('assignments/', AssignmentView.as_view(), name='assignments'),
+    path('results/', ResultView.as_view(), name='results'),
+    path('reports/', ReportView.as_view(), name='reports'),
+    path('fees/', FeeView.as_view(), name='fees'),
+    path('attendance/', AttendanceView.as_view(), name='attendance'),
+    path('timetable/', TimetableView.as_view(), name='timetable'),
+    path('calendar/', CalendarEventView.as_view(), name='calendar'),  
+      
+      
+      
+      
+      
       
     #Exposed APIs
     # Subject URLs

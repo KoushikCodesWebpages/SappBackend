@@ -4,14 +4,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from students.models import StudentsDB
 from faculties.models import FacultyDB
+from .models import Assignment, Result, Report, Fee, Attendance, Timetable, CalendarEvent
 
 from accounts.serializers import  UserSerializer
 from students.serializers import StudentsDBSerializer
 from faculties.serializers import FacultyDBSerializer
 from features.serializers import ProfileSerializer
-
-
-
+from .serializers import AssignmentSerializer, ResultSerializer, ReportSerializer, FeeSerializer, AttendanceSerializer, TimetableSerializer, CalendarEventSerializer
 
 from general.utils.base_view import BaseDBView
 
@@ -56,3 +55,47 @@ class ProfileView(BaseDBView):
             return Response({"error": "Student profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(profile_data)
+    
+
+class AssignmentView(BaseDBView):
+    model_class = Assignment
+    serializer_class = AssignmentSerializer
+    pagination_class = None  # Optionally add pagination
+    permission_classes = [IsAuthenticated]
+
+class ResultView(BaseDBView):
+    model_class = Result
+    serializer_class = ResultSerializer
+    pagination_class = None
+    permission_classes = [IsAuthenticated]
+
+class ReportView(BaseDBView):
+    model_class = Report
+    serializer_class = ReportSerializer
+    pagination_class = None
+    permission_classes = [IsAuthenticated]
+
+class FeeView(BaseDBView):
+    model_class = Fee
+    serializer_class = FeeSerializer
+    pagination_class = None
+    permission_classes = [IsAuthenticated]
+
+class AttendanceView(BaseDBView):
+    model_class = Attendance
+    serializer_class = AttendanceSerializer
+    pagination_class = None
+    permission_classes = [IsAuthenticated]
+
+class TimetableView(BaseDBView):
+    model_class = Timetable
+    serializer_class = TimetableSerializer
+    pagination_class = None
+    permission_classes = [IsAuthenticated]
+
+class CalendarEventView(BaseDBView):
+    model_class = CalendarEvent
+    serializer_class = CalendarEventSerializer
+    pagination_class = None
+    
+    
