@@ -96,7 +96,6 @@ class LoginView(APIView):
                 return Response({
                     'access': str(access_token),
                     'refresh': str(refresh_token),
-                    'role': role,
                 }, status=status.HTTP_200_OK)
             else:
                 # User is not active (email not verified)
