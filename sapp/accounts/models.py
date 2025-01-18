@@ -1,35 +1,36 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from general.utils.base_model import BaseDBModel
-
-class ProfileBase(BaseDBModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        
-
-class Standard(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
+    roll_number = models.CharField(max_length=20, unique=True)
+    year_of_study = models.PositiveIntegerField()
+    section = models.CharField(max_length=10, blank=True, null=True)  # e.g., Section A, B, etc.
+    standard = models.CharField(max_length=50)  # e.g., Grade 10, 12, etc.
+    subjects = models.JSONField(default=list)  # List of subjects as JSON
 
     def __str__(self):
-        return self.name
+        return f"Student: {self.user.username} ({self.roll_number})"
 
+class Faculty(models.Model):
+    ROLES = [
+        ('president', 'President'),
+        ('vice president', 'Vice President'),
+        ('class teacher', 'Class Teacher'),
+        ('sub-teacher', 'Sub-Teacher'),
+        ('lecturer', 'Lecturer'),
+    ]
 
-class Section(models.Model):
-    section_id = models.CharField(max_length=1, primary_key=True)
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="faculty_profile")
+    employee_id = models.CharField(max_length=20, unique=True)
+    department = models.CharField(max_length=100)
+    specialization = models.CharField(max_length=100, blank=True, null=True)
+    roles = models.CharField(
+        max_length=50,
+        choices=ROLES,  # Use the ROLES list defined above
+        default='lecturer',
+    )
     
-class Subject(models.Model):
-    
-    subject_id = models.CharField(max_length=10, primary_key=True)
-    name = models.CharField(max_length=100, unique=True)
-
     def __str__(self):
-        return self.name
+        return f"Faculty: {self.user.username} ({self.employee_id})"
 

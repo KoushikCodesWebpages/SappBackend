@@ -14,12 +14,16 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import login
+from rest_framework import status
 
-from accounts.models import  Section, Standard
-from students.models import StudentsDB
-from faculties.models import FacultyDB
+from django.contrib.auth import authenticate
+from .serializers import StudentSignupSerializer, FacultySignupSerializer, StudentLoginSerializer, FacultyLoginSerializer
 
-from accounts.serializers import SignUpSerializer,PasswordResetRequestSerializer,SetNewPasswordSerializer
+from general.utils.send_mail import send_verification_email
 
 from general.utils.tokens import email_verification_token
 
@@ -27,213 +31,107 @@ from general.utils.tokens import email_verification_token
 
 User = get_user_model()
 
-class SignUpView(APIView):
+class StudentSignupView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            # Create user
-            user = serializer.save()
-            user.is_active = False  # Deactivate account until email verification
-            user.save()
-
-            # Generate the verification token and encoded user ID
-            token = email_verification_token.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # Build the verification link
-            current_site = get_current_site(request)
-            verify_url = reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
-            verification_link = f"http://{current_site.domain}{verify_url}"
-
-            # Send email
-            send_mail(
-                'Verify Your Email Address',
-                f'Hi {user.username},\nPlease click the link to verify your email:\n{verification_link}',
-                'CharityHubForDemo@gmail.com',  # Replace with your email
-                [user.email],   
-                fail_silently=False,
-            )
-
-            return Response({'message': 'Verification email sent'}, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        # Extracting email and password from the request body
+        # Perform custom validation
+        username = request.data.get('username')
         email = request.data.get('email')
-        password = request.data.get('password')
+        roll_number = request.data.get('roll_number')
 
-        # Check if both email and password are provided
-        if not email or not password:
-            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        # Validate email format and uniqueness
+        if User.objects.filter(email=email).exists():
+            return Response({"detail": "Email is already taken."}, status=status.HTTP_400_BAD_REQUEST)
+        
 
-        # Try to get the user by email
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        # Now validate the data using the serializer
+        serializer = StudentSignupSerializer(data=request.data)
+        if serializer.is_valid():
+            # Create the user and student profile
+            user = serializer.create(validated_data=serializer.validated_data)
 
-        # Check if the password is correct
-        if user.check_password(password):
-            if user.is_active:
-                # User is authenticated and active, generate tokens
-                access_token = AccessToken.for_user(user)
-                refresh_token = RefreshToken.for_user(user)
+            # Send verification email
+            #send_verification_email(user, request)
 
-                # Determine if the user is a student or faculty
-                role = 'student' if StudentsDB.objects.filter(user=user).exists() else 'faculty' if FacultyDB.objects.filter(user=user).exists() else None
+            return Response({
+                "message": "Student signed up successfully. Please check your email for verification.",
+            }, status=status.HTTP_201_CREATED)
 
-                if role is None:
-                    return Response({'error': 'User has no associated role'}, status=status.HTTP_400_BAD_REQUEST)
+        # Return any validation errors from the serializer
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-                # Return tokens and role
+class StudentLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = StudentLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+
+            # Authenticate user
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                # If user is authenticated, create tokens
+                refresh = RefreshToken.for_user(user)
                 return Response({
-                    'access': str(access_token),
-                    'refresh': str(refresh_token),
+                    "access_token": str(refresh.access_token),
+                    "refresh_token": str(refresh)
                 }, status=status.HTTP_200_OK)
             else:
-                # User is not active (email not verified)
-                return Response({'error': 'Email not verified'}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            # Invalid password
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-        
-class LogoutView(APIView):
+                return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+class FacultySignupView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        try:
-            # Get the refresh token from the request data
-            refresh_token = request.data.get('refresh_token')
-            token = RefreshToken(refresh_token)
+        serializer = FacultySignupSerializer(data=request.data)
+        if serializer.is_valid():
+            # Create the user and faculty profile
+            faculty = serializer.save()
 
-            # Blacklist the refresh token
-            token.blacklist()
+            # Deactivate account until email verification
+            faculty.user.is_active = False
+            faculty.user.save()
 
-            return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
-        
-class VerifyEmailView(APIView):
+            # Send the verification email using the utility function
+            #send_verification_email(faculty.user, request)
+
+            return Response({
+                "message": "Faculty signed up successfully. Verification email sent.",
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FacultyLoginView(APIView):
     permission_classes = [AllowAny]
-    def get(self, request, uidb64, token):
-        try:
-            # Decode the uid and retrieve the user
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = get_object_or_404(User, pk=uid)
 
-            # Check if the token is valid
-            if email_verification_token.check_token(user, token):
-                user.is_active = True  # Activate the user account
-                user.save()
-                
-                # Inline HTML response for success
-                return HttpResponse('''
-                    <html>
-                        <head><title>Email Verification</title></head>
-                        <body>
-                            <h1>Email Verified Successfully</h1>
-                            <p>Your email has been verified. You can now log in to your account.</p>
-                        </body>
-                    </html>
-                ''')
-            else:
-                # Inline HTML response for failure
-                return HttpResponse('''
-                    <html>
-                        <head><title>Email Verification Failed</title></head>
-                        <body>
-                            <h1>Email Verification Failed</h1>
-                            <p>The verification link is invalid or has expired.</p>
-                        </body>
-                    </html>
-                ''', status=400)
-        except Exception:
-            return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
-        
-class PasswordResetRequestView(APIView):
-    permission_classes = [AllowAny]
     def post(self, request):
-        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer = FacultyLoginSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
 
-            # Generate token and UID
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # Create password reset link
-            current_site = get_current_site(request)
-            reset_url = reverse('reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
-            reset_link = f"http://{current_site.domain}{reset_url}"
-
-            # Send email
-            send_mail(
-                'Password Reset Request',
-                f'Hi {user.username},\nPlease click the link to reset your password:\n{reset_link}',
-                'koushikaltacc',  # Replace with your email
-                [user.email],
-                fail_silently=False,
-            )
-
-            return Response({'message': 'Password reset email sent'}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-class PasswordResetConfirmView(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-
-        if user is not None and default_token_generator.check_token(user, token):
-            # Render the password reset template with context
-            context = {
-                'uidb64': uidb64,
-                'token': token
-            }
-            return render(request, 'password_reset_confirm.html', context)
-        else:
-            return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request, uidb64, token):
-        serializer = SetNewPasswordSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                uid = force_str(urlsafe_base64_decode(uidb64))
-                user = User.objects.get(pk=uid)
-            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-                user = None
-
-            if user is not None and default_token_generator.check_token(user, token):
-                user.set_password(serializer.validated_data['password'])
-                user.save()
-                return HttpResponse('''
-                    <html>
-                        <head><title>Password Reset</title></head>
-                        <body>
-                            <h1>Password has been successfully reset Successfully</h1>
-                            <p>You can now log in to your account with the new password.</p>
-                        </body>
-                    </html>
-                ''')
+            # Authenticate user
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                # If user is authenticated, create tokens
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "access_token": str(refresh.access_token),
+                    "refresh_token": str(refresh)
+                }, status=status.HTTP_200_OK)
             else:
-                return Response({'error': 'Invalid token or user'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

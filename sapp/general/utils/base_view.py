@@ -21,14 +21,14 @@ class BaseDBView(APIView):
         if index is not None:
             # Retrieve a specific instance by index
             try:
-                obj = self.model_class.objects.get(id=index)
+                obj = self.model_class.objects.get(id=index, user=request.user)  # Ensure it belongs to the logged-in user
                 serializer = self.serializer_class(obj)
                 return Response(serializer.data)
             except self.model_class.DoesNotExist:
-                raise NotFound("Data not found")
+                raise NotFound("Data not found or you do not have permission to access it.")
         else:
-            # Handle filtering, sorting, and searching
-            queryset = self.model_class.objects.all()
+            # Handle filtering, sorting, and searching for logged-in user only
+            queryset = self.model_class.objects.filter(user=request.user)  # Filter data for the logged-in user
 
             # Filtering
             filter_params = {key: value for key, value in request.GET.items() if key not in ['sort', 'search', 'page']}
@@ -55,6 +55,7 @@ class BaseDBView(APIView):
             serializer = self.serializer_class(paginated_queryset, many=True)
 
             return paginator.get_paginated_response(serializer.data)
+
 
     def patch(self, request, index=None):
         if index is not None:
