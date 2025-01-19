@@ -2,4 +2,4 @@
 2, End Points can Be only accessed by the application.
 3, Api Key Rotation for only application.
 4, Reducing Credential leak damage. Via Otp, edit access for only certain time, for certian data.
-5, Username shouldnt contain @
+5, Username shouldnt contain @.
