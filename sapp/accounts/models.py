@@ -29,25 +29,31 @@ class Student(models.Model):
 
 class Faculty(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='faculty_profile')
-    faculty_id = models.CharField(max_length=50, blank=True,null=True)
-    department = models.CharField(max_length=100)
+    faculty_id = models.CharField(max_length=50, blank=True, null=True)
+    department = models.CharField(max_length=100, blank=True)
     specialization = models.CharField(max_length=100, blank=True, null=True)
-    subjects = models.JSONField(default=list)
+    coverage = models.JSONField(default=list)  # Updated from 'subjects'
     class_teacher = models.JSONField(default=dict, blank=True)
-    
+
     def __str__(self):
         return f"Faculty: {self.user.username}"
 
-    def set_class_teacher(self, standard, year):
+    def is_subject_teacher(self):
         """
-        Set the class teacher information.
+        Check if the faculty is only a subject teacher.
         """
-        self.class_teacher = {"standard": standard, "year": year}
+        return not bool(self.class_teacher)
+
+    def add_coverage(self, standard, section, subject):
+        """
+        Add a new subject coverage.
+        """
+        self.covers.append([standard, section, subject])
         self.save()
 
     def get_class_teacher(self):
         """
-        Get the class teacher information as a dictionary.
+        Return the class teacher details.
         """
         return self.class_teacher
     

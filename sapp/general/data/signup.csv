@@ -1,2 +1,0 @@
-username,email,role,enrollment_number,standard,section,subjects,attendance_percent,password
-student1@student.com,student1@student.com,student,ENR001,10,A,"['Math', 'Science']",95,password123

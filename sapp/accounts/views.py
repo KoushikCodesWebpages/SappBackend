@@ -80,7 +80,7 @@ class ExcelUploadView(APIView):
                 'faculty_id': row.get('faculty_id', ''),
                 'department': row['department'],
                 'specialization': row.get('specialization', ''),
-                'subjects': row.get('subjects', []),
+                'coverage': row.get('coverage', []),
                 'class_teacher': row.get('class_teacher', {})
             }
             Faculty.objects.create(**faculty_data)

@@ -21,7 +21,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
-        fields = ['user', 'faculty_id', 'department', 'specialization', 'subjects', 'class_teacher']
+        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher']
         
 class OfficeAdminSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +30,5 @@ class OfficeAdminSerializer(serializers.ModelSerializer):
         
 class ExcelUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
+    
+    

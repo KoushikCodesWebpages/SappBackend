@@ -1,0 +1,2 @@
+username,email,password,role,enrollment_number,standard,section,subjects,attendance_percent
+student1@student.com,student1@student.com,password123,student,ENR001,10,A,"['Math', 'Science']",95
