@@ -1,4 +1,4 @@
-from rest_framework import status
+'''from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -145,4 +145,4 @@ class CalendarEventView(BaseDBView):
         restrict_non_get_for_students(request)
         return super().dispatch(request, *args, **kwargs)
 
-    
+'''

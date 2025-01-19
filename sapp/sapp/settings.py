@@ -16,7 +16,7 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+AUTH_USER_MODEL = 'accounts.AuthUser' 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -34,6 +34,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Application definition
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

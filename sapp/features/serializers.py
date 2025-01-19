@@ -1,4 +1,4 @@
-from rest_framework import serializers
+'''from rest_framework import serializers
 
 from .models import Assignment, Result, Report, Fee, Attendance, Timetable, CalendarEvent
 
@@ -60,3 +60,4 @@ class CalendarEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalendarEvent
         fields = '__all__'
+'''
