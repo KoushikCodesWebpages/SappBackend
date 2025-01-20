@@ -1,2 +1,2 @@
-username,email,password,role,faculty_id,department,specialization,covers,class_teacher
+username,email,password,role,faculty_id,department,specialization,coverage,class_teacher
 faculty1,faculty1@school.com,password123,faculty,F001,Science,Physics,"[['7', 'C', 'Physics'], ['8', 'B', 'Math']]","['7', 'C']"

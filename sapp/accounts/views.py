@@ -3,12 +3,18 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
-from .models import Student, Faculty, OfficeAdmin
+
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import IsAuthenticated, IsAdminUser,AllowAny
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Student, Faculty, OfficeAdmin
+from .serializers import StudentNavbarSerializer,StudentProfileSerializer,FacultyNavbarSerializer,FacultyProfileSerializer
+
+
 
 class ExcelUploadView(APIView):
     permission_classes = [AllowAny]
@@ -145,3 +151,76 @@ class LoginView(APIView):
             "access_token": str(access_token),
             "refresh_token": str(refresh)
         }, status=status.HTTP_200_OK)
+        
+        
+class StudentNavbarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch the navbar data for the logged-in student."""
+        student = request.user.student_profile
+        serializer = StudentNavbarSerializer(student)
+        return Response(serializer.data)
+
+class StudentProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch the profile data for the logged-in student or faculty."""
+        # For logged-in student
+        student = request.user.student_profile
+        serializer = StudentProfileSerializer(student)
+        return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        """Update the profile data for the logged-in user or a student (if faculty)."""
+        student_code = kwargs.get('student_code', None)  # Use student_code instead of student_id
+
+        # Check if the request is for a specific student (only faculty can update student data)
+        if student_code:
+            # Ensure the user is a faculty member to update student data
+            if request.user.role != 'faculty':
+                raise PermissionDenied(detail="Only faculty can update student profiles. But good job! You have skills at finding exploits. Try to find and report it to the office admin.")
+
+            # Attempt to find the student based on student_code
+            try:
+                student = Student.objects.get(student_code=student_code)
+            except Student.DoesNotExist:
+                return Response({"error": "Student not found."}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Update the student profile
+            serializer = StudentProfileSerializer(student, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # If no student_code is provided, return an error
+        return Response({"error": "Student code is required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+class FacultyNavbarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch the navbar data for the logged-in faculty."""
+        faculty = request.user.faculty_profile
+        serializer = FacultyNavbarSerializer(faculty)
+        return Response(serializer.data)
+
+class FacultyProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch the profile data for the logged-in faculty."""
+        faculty = request.user.faculty_profile
+        serializer = FacultyProfileSerializer(faculty)
+        return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        """Update the profile data for the logged-in faculty."""
+        faculty = request.user.faculty_profile
+        serializer = FacultyProfileSerializer(faculty, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)

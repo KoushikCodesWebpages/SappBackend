@@ -23,6 +23,14 @@ class Student(models.Model):
     section = models.CharField(max_length=10, blank=True, null=True)
     subjects = models.JSONField(default=list)
     attendance_percent = models.PositiveIntegerField(default=0)
+    student_code = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        # Automatically generate the student_code before saving
+        if not self.student_code:
+            self.student_code = f"{self.user.username}-{self.standard}-{self.section}"
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return f"Student: {self.user.username}"
 
