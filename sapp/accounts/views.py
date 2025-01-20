@@ -217,10 +217,16 @@ class FacultyProfileView(APIView):
         return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
-        """Update the profile data for the logged-in faculty."""
+        """Update the profile data for the logged-in faculty and user."""
         faculty = request.user.faculty_profile
         serializer = FacultyProfileSerializer(faculty, data=request.data, partial=True)
+
         if serializer.is_valid():
+            # Save the updated data
             serializer.save()
+
+            # Return the updated data as response
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+
+        # Return errors if any occur during validation
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

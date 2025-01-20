@@ -71,17 +71,19 @@ class FacultyNavbarSerializer(serializers.ModelSerializer):
         fields = ['name']
            
 class FacultyProfileSerializer(serializers.ModelSerializer):
-    user = AuthUserSerializer(read_only=True)
+    user = AuthUserSerializer()
+
     class Meta:
         model = Faculty
         fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher']
-        read_only_fields = ['user', 'faculty_id']
     
     def update(self, instance, validated_data):
-        # Update the user details (including username)
-        user_data = validated_data.pop('user', {})
-        for attr, value in user_data.items():
-            setattr(instance.user, attr, value)  # Update the corresponding field in the related user model
-        instance.user.save()  # Save the user model changes
+        # Handle user update (username, email)
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            for attr, value in user_data.items():
+                setattr(instance.user, attr, value)
+            instance.user.save()
+
+        # Update the student profile data
         return super().update(instance, validated_data)
-    
