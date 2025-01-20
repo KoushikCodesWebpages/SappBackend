@@ -3,7 +3,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView
+from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView, FilterStudentsView
 
 
 urlpatterns = [
@@ -19,7 +19,14 @@ urlpatterns = [
      path('student/profile/',StudentProfileView.as_view(),name='student-profile'),
      path('faculty/navbar/',FacultyNavbarView.as_view(),name='student-navbar'),
      path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
-     path('student-profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile')
+     path('student-profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
+     
+     
+    #default
+     path('faculty/filter-students/', FilterStudentsView.as_view(), name ='filter-students'),
+     
+     
+    #attendance
 ]
 
 # Serving media files in development

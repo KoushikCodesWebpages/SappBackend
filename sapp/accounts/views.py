@@ -230,3 +230,35 @@ class FacultyProfileView(APIView):
 
         # Return errors if any occur during validation
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
+class FilterStudentsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Filter students based on standard and section."""
+        # Get the standard and section from the request query parameters
+        standard_section = request.query_params.get('class', None)
+
+        # Validate the input
+        if not standard_section:
+            return Response({"error": "class parameter is required. Format: ['7', 'C']"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            standard, section = eval(standard_section)  # Safely parse the input list
+            if not (isinstance(standard, str) and isinstance(section, str)):
+                raise ValueError
+        except (ValueError, SyntaxError):
+            return Response({"error": "Invalid format for class. Format should be ['standard', 'section']"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Query the students based on standard and section
+        students = Student.objects.filter(standard=standard, section=section).values('student_code', 'user__username')
+        
+        # Return the filtered students
+        return Response(list(students), status=status.HTTP_200_OK)
