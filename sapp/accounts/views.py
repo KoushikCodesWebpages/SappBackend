@@ -69,11 +69,14 @@ class ExcelUploadView(APIView):
 
             # Create the user and hash the password
             user = get_user_model().objects.create_user(**user_data)
-            
+
             # Now, hash the password using set_password (this is done automatically by create_user)
             # But you can call it manually if you want to, like this:
             user.set_password(row['password'])
             user.save()  # Save the user after setting the hashed password
+
+            # Generate the student_code in the format email-standard-section
+            student_code = f"{row['email']}-{row['standard']}-{row.get('section', '')}"
 
             # Create the related Student model
             student_data = {
@@ -82,8 +85,10 @@ class ExcelUploadView(APIView):
                 'standard': row['standard'],
                 'section': row.get('section', ''),  # Optional field
                 'subjects': row.get('subjects', []),  # Optional field
-                'attendance_percent': row.get('attendance_percent', 0)  # Optional field
+                'attendance_percent': row.get('attendance_percent', 0),  # Optional field
+                'student_code': student_code  # Set the generated student_code
             }
+
             Student.objects.create(**student_data)
 
         except Exception as e:

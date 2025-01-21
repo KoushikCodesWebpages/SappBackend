@@ -2,10 +2,49 @@ from rest_framework import serializers
 
 from .models import Attendance, AttendanceLock
 
+from accounts.models import Student
+
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceLock
         fields = ['id', 'date', 'is_locked']
+        
+class AttendanceSerializer(serializers.ModelSerializer):
+    student = serializers.CharField(source='student.student_code')  # Display student_code in the response
+
+    class Meta:
+        model = Attendance
+        fields = ['id', 'student', 'date', 'status']
+
+    def create(self, validated_data):
+        # Extract the student_code from the validated data
+        student_code = validated_data.get('student', None)
+
+        if student_code:
+            # Look up the Student object based on student_code
+            try:
+                student = Student.objects.get(student_code=student_code)
+            except Student.DoesNotExist:
+                raise serializers.ValidationError({"student": "Student with the provided student_code does not exist."})
+            validated_data['student'] = student  # Set the student field to the actual Student object
+
+        # Create the Attendance object with the student relation
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Extract the student_code from the validated data
+        student_code = validated_data.get('student', None)
+
+        if student_code:
+            # Look up the Student object based on student_code
+            try:
+                student = Student.objects.get(student_code=student_code)
+            except Student.DoesNotExist:
+                raise serializers.ValidationError({"student": "Student with the provided student_code does not exist."})
+            validated_data['student'] = student  # Set the student field to the actual Student object
+
+        # Update the Attendance object with the new values
+        return super().update(instance, validated_data)
 
 
 '''
