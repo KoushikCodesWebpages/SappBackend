@@ -1,15 +1,14 @@
-'''from rest_framework import serializers
+from rest_framework import serializers
 
-from .models import Assignment, Result, Report, Fee, Attendance, Timetable, CalendarEvent
+from .models import Attendance, AttendanceLock
 
-from accounts.serializers import UserSerializer 
-from students.serializers import StudentsDBSerializer
-from faculties.serializers import FacultyDBSerializer
-from exposed.serializers import StandardSerializer, SectionSerializer
-
-
+class AttendanceLockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceLock
+        fields = ['id', 'date', 'is_locked']
 
 
+'''
 class ProfileSerializer(serializers.Serializer):
     user = UserSerializer()
     image = serializers.ImageField(required=False)

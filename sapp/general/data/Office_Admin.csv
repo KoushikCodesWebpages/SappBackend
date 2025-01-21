@@ -1,0 +1,2 @@
+username,email,password,role,employee_id,school_name
+admin1,admin1@example.com,securepassword1,office_admin,EID123,Green Valley High School

@@ -8,7 +8,7 @@ class AuthUser(AbstractUser):
         ('faculty', 'Faculty'),
         ('office_admin', 'Office Admin')
     ]
-
+    
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=False, null=False)
     is_verified = models.BooleanField(default=False) 
 
@@ -70,3 +70,4 @@ class OfficeAdmin(models.Model):
     employee_id = models.CharField(max_length=50,blank=True, null=True)
     school_name = models.CharField(max_length=100)
 
+    

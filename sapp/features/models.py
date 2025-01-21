@@ -1,9 +1,25 @@
-'''from django.db import models
+from django.db import models
 
 from django.db import models
-from django.contrib.auth.models import User
+from accounts.models import Student
 
-class Notification(models.Model):
+
+class Attendance(models.Model):
+    student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
+    date = models.DateField()
+    status = models.CharField(max_length=20, choices=[('present', 'Present'), ('absent', 'Absent')])
+
+    def __str__(self):
+        return f"Attendance for {self.student.username} on {self.date}: {self.status}"
+    
+class AttendanceLock(models.Model):
+    date = models.DateField()
+    is_locked = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Attendance lock for {self.date}: {'Locked' if self.is_locked else 'Open'}"
+
+'''class Notification(models.Model):
     user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     message = models.TextField()

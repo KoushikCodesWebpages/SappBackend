@@ -87,3 +87,5 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
 
         # Update the student profile data
         return super().update(instance, validated_data)
+    
+    

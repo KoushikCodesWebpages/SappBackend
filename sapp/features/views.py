@@ -1,22 +1,102 @@
-'''from rest_framework import status
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from .models import Attendance,AttendanceLock
 
-from students.models import StudentsDB
-from faculties.models import FacultyDB
-from .models import Assignment, Result, Report, Fee, Attendance, Timetable, CalendarEvent
+from features.serializers import AttendanceLockSerializer
 
-from accounts.serializers import  UserSerializer
-from students.serializers import StudentsDBSerializer
-from faculties.serializers import FacultyDBSerializer
-from features.serializers import ProfileSerializer
-from .serializers import AssignmentSerializer, ResultSerializer, ReportSerializer, FeeSerializer, AttendanceSerializer, TimetableSerializer, CalendarEventSerializer
 
 from general.utils.base_view import BaseDBView
     
 from rest_framework.exceptions import PermissionDenied
+from datetime import date
 
-def restrict_non_get_for_students(request):
+class AttendanceLockView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        """
+        GET: Return the latest AttendanceLock for the current date.
+        Allowed for faculty and office roles only.
+        """
+        if request.user.role in ['faculty', 'office_admin']:
+            today = date.today()
+            try:
+                attendance_lock = AttendanceLock.objects.filter(date=today).latest('id')
+                serializer = AttendanceLockSerializer(attendance_lock)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except AttendanceLock.DoesNotExist:
+                return Response({"detail": "No attendance lock found for today."}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"detail": "Access denied."}, status=status.HTTP_403_FORBIDDEN)
+
+    def post(self, request):
+        """
+        POST: Create a new AttendanceLock entry for a specific date.
+        Allowed for office role only.
+        """
+        if request.user.role == 'office_admin':
+            # Ensure only one AttendanceLock per date
+            date_to_lock = request.data.get('date')
+            if AttendanceLock.objects.filter(date=date_to_lock).exists():
+                return Response({"detail": "Attendance lock for this date already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = AttendanceLockSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"detail": "Access denied."}, status=status.HTTP_403_FORBIDDEN)
+    def put(self, request):
+        """
+        PUT: Update the 'is_locked' field of an existing AttendanceLock.
+        Allowed for office role only, and only when 'is_locked' is currently false.
+        """
+        if request.user.role == 'office':
+            date_to_update = request.data.get('date')
+            try:
+                # Find the record for the specified date
+                attendance_lock = AttendanceLock.objects.get(date=date_to_update)
+
+                # Check if `is_locked` is currently false
+                if not attendance_lock.is_locked:
+                    serializer = AttendanceLockSerializer(attendance_lock, data=request.data, partial=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response(serializer.data, status=status.HTTP_200_OK)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({"detail": "Attendance lock is already true; no updates allowed."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            except AttendanceLock.DoesNotExist:
+                return Response({"detail": "Attendance lock for this date does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"detail": "Access denied."}, status=status.HTTP_403_FORBIDDEN)
+
+class AttendanceDaysView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        GET: Retrieve all locked (working days) and unlocked (non-working days) dates.
+        Allowed for faculty and office roles only.
+        """
+        if request.user.role in ['faculty', 'office']:
+            # Query the AttendanceLock model
+            locked_days = AttendanceLock.objects.filter(is_locked=True).values_list('date', flat=True)
+            unlocked_days = AttendanceLock.objects.filter(is_locked=False).values_list('date', flat=True)
+
+            return Response({
+                "working_days": list(locked_days),
+                "non_working_days": list(unlocked_days)
+            }, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Access denied."}, status=status.HTTP_403_FORBIDDEN)
+
+
+'''def restrict_non_get_for_students(request):
     """
     Restrict non-GET requests for students.
     """
@@ -145,4 +225,4 @@ class CalendarEventView(BaseDBView):
         restrict_non_get_for_students(request)
         return super().dispatch(request, *args, **kwargs)
 
-'''
+    '''
