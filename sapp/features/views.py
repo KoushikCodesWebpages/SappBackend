@@ -235,14 +235,9 @@ class AnnouncementView(APIView):
     GET: Fetch a detailed list of all announcements or an individual announcement by ID.
     DELETE: Delete an announcement by ID (only office_admin role).
     """
-    
-    # Check if user has office_admin role
-    def is_office_admin(self, user):
-        return user.groups.filter(name='office_admin').exists()
-
     # POST: Create a new announcement
     def post(self, request):
-        if not self.is_office_admin(request.user):  # Check if the user is an office_admin
+        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
             return Response({"error": "Only office_admin can create announcements."}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = AnnouncementDetailedSerializer(data=request.data)
