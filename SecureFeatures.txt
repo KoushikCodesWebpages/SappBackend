@@ -4,3 +4,4 @@
 4, Reducing Credential leak damage. Via Otp, edit access for only certain time, for certian data.
 5, Username shouldnt contain @.
 6, Data is accessed via a security code that dynamically changes for each students (email-standard-section)
+7, User can access only their data
