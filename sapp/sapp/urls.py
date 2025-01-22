@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView, FilterStudentsView
-from features.views import AttendanceLockView,AttendanceDaysView, AttendanceView
+from features.views import AttendanceLockView,AttendanceDaysView, AttendanceView, AnnouncementView
 
 
 urlpatterns = [
@@ -31,6 +31,9 @@ urlpatterns = [
     path('office/attendancedays/', AttendanceDaysView.as_view(), name='attendance-days'),
     path('class/attendance/', AttendanceView.as_view(), name='attendance-list'),
     path('class/attendance/<str:student_code>/', AttendanceView.as_view(), name='attendance-detail'),
+    
+    #announcement
+    path('office/announcement/', AnnouncementView.as_view(),name='announcemnt'),
 ]
 
 # Serving media files in development

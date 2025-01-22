@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Attendance, AttendanceLock
 
 from accounts.models import Student
+from features.models import Announcement
 
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,6 +46,33 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
         # Update the Attendance object with the new values
         return super().update(instance, validated_data)
+
+
+class AnnouncementMainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = ['id', 'title', 'date', 'timings']
+        
+class AnnouncementDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = [
+            'id',
+            'title',
+            'description',
+            'date',
+            'timings',
+            'offline_or_online',
+            'till',
+            'created_by',
+            'created_at',
+            'updated_at'
+        ]
+
+
+
+
+
 
 
 '''

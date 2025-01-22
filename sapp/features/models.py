@@ -1,6 +1,7 @@
+import uuid
 from django.db import models
+from django.utils.timezone import now
 
-from django.db import models
 from accounts.models import Student
 
 
@@ -18,6 +19,33 @@ class AttendanceLock(models.Model):
 
     def __str__(self):
         return f"Attendance lock for {self.date}: {'Locked' if self.is_locked else 'Open'}"
+    
+
+    
+class Announcement(models.Model):
+    # Fields
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    date = models.DateField()
+    timings = models.CharField(max_length=100)
+    offline_or_online = models.CharField(max_length=50, choices=(('Offline', 'Offline'), ('Online', 'Online')))
+    till = models.DateTimeField()
+    created_by = models.CharField(max_length=255)  # Admin's username or email
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Methods
+    @classmethod
+    def get_latest_active(cls):
+        """Fetch the latest active announcement."""
+        return cls.objects.filter(till__gte=now()).order_by('-created_at').first()
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
 
 '''class Notification(models.Model):
     user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
