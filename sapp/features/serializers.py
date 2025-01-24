@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Attendance, AttendanceLock
+from .models import Attendance, AttendanceLock,CalendarEvent
 
 from accounts.models import Student
 from features.models import Announcement
@@ -69,6 +69,10 @@ class AnnouncementDetailedSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
 
+class CalendarEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CalendarEvent
+        fields = '__all__'
 
 
 
