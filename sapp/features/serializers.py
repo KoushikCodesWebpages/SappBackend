@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Attendance, AttendanceLock,CalendarEvent
 
 from accounts.models import Student
-from features.models import Announcement
+from features.models import Announcement,Timetable
 
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,7 +74,10 @@ class CalendarEventSerializer(serializers.ModelSerializer):
         model = CalendarEvent
         fields = '__all__'
 
-
+class TimetableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Timetable
+        fields = '__all__'
 
 
 

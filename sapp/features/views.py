@@ -8,9 +8,9 @@ from datetime import date
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import Student
-from features.models import Attendance,AttendanceLock,Announcement,CalendarEvent
+from features.models import Attendance,AttendanceLock,Announcement,CalendarEvent,Timetable
 
-from features.serializers import AttendanceLockSerializer, AttendanceSerializer, AnnouncementMainSerializer,AnnouncementDetailedSerializer,CalendarEventSerializer
+from features.serializers import AttendanceLockSerializer, AttendanceSerializer, AnnouncementMainSerializer,AnnouncementDetailedSerializer,CalendarEventSerializer,TimetableSerializer
 
 
 class AttendanceLockView(APIView):
@@ -327,70 +327,84 @@ class CalendarEventView(APIView):
             )
     
     
-'''def restrict_non_get_for_students(request):
-    """
-    Restrict non-GET requests for students.
-    """
-    user = request.user
-    # If the user is a student and the request method is not GET
-    if hasattr(user, 'student_profile') and request.method != 'GET':
-        raise PermissionDenied("Students are only allowed to perform GET requests.")
-
     
-class ProfileView(BaseDBView):
-    serializer_class = ProfileSerializer  # Using ProfileSerializer for reading user profile
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        profile_data = {}
-
-        # Fetch student profile
+class TimetableView(APIView):
+    """
+    Handle GET, POST, PUT, and DELETE requests for Timetable objects.
+    """
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests: Any authenticated user can fetch timetables.
+        """
         try:
-            student = StudentsDB.objects.get(user=user)
-            profile_data['student_profile'] = StudentsDBSerializer(student).data
-        except StudentsDB.DoesNotExist:
-            profile_data['student_profile'] = None
+            timetables = Timetable.objects.all()
+            serializer = TimetableSerializer(timetables, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'detail': f'Error fetching timetables: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        # Fetch faculty profile (not included in the response)
+    def post(self, request):
+        """
+        Handle POST requests: Only office_admins can create timetables.
+        """
+        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
+            return Response({"error": "Only office_admin can create timetables."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = TimetableSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user.username)  # Log the admin creating the timetable
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, *args, **kwargs):
+        """
+        Handle PUT requests: Only office_admins can update timetables.
+        """
+        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
+            return Response({"error": "Only office_admin can update timetables."}, status=status.HTTP_403_FORBIDDEN)
+
+        timetable_id = kwargs.get('pk')
         try:
-            faculty = FacultyDB.objects.get(user=user)  # Optional logic for faculty
-        except FacultyDB.DoesNotExist:
-            pass  # Do nothing if faculty doesn't exist
+            timetable = Timetable.objects.get(id=timetable_id)
+            serializer = TimetableSerializer(timetable, data=request.data, partial=True)  # Allow partial updates
+            if serializer.is_valid():
+                serializer.save()  # Save the updates
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Timetable.DoesNotExist:
+            return Response({'detail': 'Timetable not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {'detail': f'Error updating timetable: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        return Response(profile_data)
-
-    def patch(self, request):
-        user = request.user
-        profile_data = {}
-
-        # Update student profile if it exists
+    def delete(self, request, *args, **kwargs):
+        """
+        Handle DELETE requests: Only office_admins can delete timetables.
+        """
+        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
+            return Response(
+                {'detail': 'You do not have permission to delete timetables.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        timetable_id = kwargs.get('pk')
         try:
-            student = StudentsDB.objects.get(user=user)
-            student_serializer = StudentsDBSerializer(student, data=request.data, partial=True)
-            if student_serializer.is_valid(raise_exception=True):
-                student_serializer.save()
-                profile_data['student_profile'] = student_serializer.data
-            else:
-                return Response(student_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except StudentsDB.DoesNotExist:
-            return Response({"error": "Student profile not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        return Response(profile_data)
-    
-
-class AssignmentView(BaseDBView):
-    model_class = Assignment
-    serializer_class = AssignmentSerializer
-    pagination_class = None
-    permission_classes = [IsAuthenticated]
-
-    def dispatch(self, request, *args, **kwargs):
-        # Restrict non-GET requests for students
-        restrict_non_get_for_students(request)
-        return super().dispatch(request, *args, **kwargs)
-
-
+            timetable = Timetable.objects.get(id=timetable_id)
+            timetable.delete()
+            return Response({'detail': 'Timetable deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        except Timetable.DoesNotExist:
+            return Response({'detail': 'Timetable not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {'detail': f'Error deleting timetable: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+'''
 class ResultView(BaseDBView):
     model_class = Result
     serializer_class = ResultSerializer
@@ -416,39 +430,6 @@ class ReportView(BaseDBView):
 class FeeView(BaseDBView):
     model_class = Fee
     serializer_class = FeeSerializer
-    pagination_class = None
-    permission_classes = [IsAuthenticated]
-
-    def dispatch(self, request, *args, **kwargs):
-        restrict_non_get_for_students(request)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class AttendanceView(BaseDBView):
-    model_class = Attendance
-    serializer_class = AttendanceSerializer
-    pagination_class = None
-    permission_classes = [IsAuthenticated]
-
-    def dispatch(self, request, *args, **kwargs):
-        restrict_non_get_for_students(request)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class TimetableView(BaseDBView):
-    model_class = Timetable
-    serializer_class = TimetableSerializer
-    pagination_class = None
-    permission_classes = [IsAuthenticated]
-
-    def dispatch(self, request, *args, **kwargs):
-        restrict_non_get_for_students(request)
-        return super().dispatch(request, *args, **kwargs)
-
-
-class CalendarEventView(BaseDBView):
-    model_class = CalendarEvent
-    serializer_class = CalendarEventSerializer
     pagination_class = None
     permission_classes = [IsAuthenticated]
 
