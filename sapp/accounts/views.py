@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser,AllowAny
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Student, Faculty, OfficeAdmin
+from accounts.models import AuthUser, Student, Faculty, OfficeAdmin
 from .serializers import StudentNavbarSerializer,StudentProfileSerializer,FacultyNavbarSerializer,FacultyProfileSerializer
 
 
@@ -86,7 +86,8 @@ class ExcelUploadView(APIView):
                 'section': row.get('section', ''),  # Optional field
                 'subjects': row.get('subjects', []),  # Optional field
                 'attendance_percent': row.get('attendance_percent', 0),  # Optional field
-                'student_code': student_code  # Set the generated student_code
+                'student_code': student_code,  # Set the generated student_code
+                'academic_year': row.get('academic_year'),
             }
 
             Student.objects.create(**student_data)

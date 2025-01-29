@@ -19,11 +19,12 @@ class AuthUser(AbstractUser):
 class Student(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_profile')
     enrollment_number = models.CharField(max_length=50, unique=True)
-    standard= models.PositiveIntegerField()
+    standard = models.PositiveIntegerField()
     section = models.CharField(max_length=10, blank=True, null=True)
     subjects = models.JSONField(default=list)
     attendance_percent = models.PositiveIntegerField(default=0)
     student_code = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    academic_year = models.CharField(max_length=20)  # New field for academic year
     
     def save(self, *args, **kwargs):
         # Automatically generate the student_code before saving
@@ -32,7 +33,7 @@ class Student(models.Model):
         super().save(*args, **kwargs)
         
     def __str__(self):
-        return f"Student: {self.user.username}"
+        return f"Student: {self.user.username} ({self.academic_year})"
 
 
 class Faculty(models.Model):
@@ -52,11 +53,11 @@ class Faculty(models.Model):
         """
         return not bool(self.class_teacher)
 
-    def add_coverage(self, standard, section, subject):
+    def add_coverage(self, standard, section, subject, academic_year):
         """
         Add a new subject coverage.
         """
-        self.covers.append([standard, section, subject])
+        self.coverage.append([standard, section, subject, academic_year])
         self.save()
 
     def get_class_teacher(self):
