@@ -25,6 +25,7 @@ class Student(models.Model):
     attendance_percent = models.PositiveIntegerField(default=0)
     student_code = models.CharField(max_length=100, unique=True, blank=True, null=True)
     academic_year = models.CharField(max_length=20)  # New field for academic year
+    image = models.ImageField(upload_to='students/pics/', blank=True, null=True)
     
     def save(self, *args, **kwargs):
         # Automatically generate the student_code before saving
@@ -43,6 +44,7 @@ class Faculty(models.Model):
     specialization = models.CharField(max_length=100, blank=True, null=True)
     coverage = models.JSONField(default=list)  # Updated from 'subjects'
     class_teacher = models.JSONField(default=dict, blank=True)
+    image = models.ImageField(upload_to='faculty/pics/', blank=True, null=True)
 
     def __str__(self):
         return f"Faculty: {self.user.username}"
@@ -70,5 +72,6 @@ class OfficeAdmin(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='office_admin_profile')
     employee_id = models.CharField(max_length=50,blank=True, null=True)
     school_name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='office/pics/', blank=True, null=True)
 
     

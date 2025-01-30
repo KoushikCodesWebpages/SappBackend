@@ -50,7 +50,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','student_code']
+        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','student_code','image']
 
     def update(self, instance, validated_data):
         # Handle user update (username, email)
@@ -75,7 +75,7 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Faculty
-        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher']
+        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image']
     
     def update(self, instance, validated_data):
         # Handle user update (username, email)
