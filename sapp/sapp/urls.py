@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView, FilterStudentsView
 
-from features.views import AttendanceLockView,AttendanceDaysView, AttendanceView, AnnouncementView,AnnouncementMainDisplayView, CalendarEventView,TimetableView
+from features.views import AttendanceLockView,AttendanceDaysView, AttendanceView, AnnouncementView,AnnouncementMainDisplayView, CalendarEventView,TimetableView, ResultLockView, ResultAPIView
 
 
 urlpatterns = [
@@ -32,6 +32,13 @@ urlpatterns = [
     path('office/attendancedays/', AttendanceDaysView.as_view(), name='attendance-days'),
     path('class/attendance/', AttendanceView.as_view(), name='attendance-list'),
     path('class/attendance/<str:student_code>/', AttendanceView.as_view(), name='attendance-detail'),
+    
+    path('results/', ResultAPIView.as_view(), name='result-list'),
+    path('results/<int:pk>/', ResultAPIView.as_view(), name='result-detail'),
+    
+    #results
+    path('office/resultlock/', ResultLockView.as_view(),name= "resultlock"),
+    path('office/resultlock/<int:pk>/', ResultLockView.as_view(),name= "resultlock-detail"),
     
     #announcement
     path('office/announcementdisplay/',AnnouncementMainDisplayView.as_view(),name='announcement'),

@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from accounts.models import Student
-
+from django.core.exceptions import ValidationError
 
 class Attendance(models.Model):
     student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
@@ -94,3 +94,48 @@ class Timetable(models.Model):
     def __str__(self):
         return f"{self.standard}-{self.section} | {self.subject} | {self.day} ({self.start_time} - {self.end_time})"
 
+
+class ResultLock(models.Model):
+    title = models.CharField(max_length=100, unique=True)  # Unique title for the result lock
+    start_date = models.DateField()  # Start date for result submission
+    end_date = models.DateField()  # End date for result submission
+
+    def __str__(self):
+        return f"{self.title} ({self.start_date} to {self.end_date})"
+
+    def is_active(self):
+        """Check if the result lock is currently active."""
+        from django.utils import timezone
+        return self.start_date <= timezone.now().date() <= self.end_date
+    
+    
+class Result(models.Model):
+    student = models.ForeignKey(
+        Student, 
+        on_delete=models.CASCADE, 
+        related_name='results', 
+        to_field='student_code')
+    # Link to the Student model
+    subject = models.CharField(max_length=100)  # Subject for which the result is recorded
+    marks = models.PositiveIntegerField()  # Marks obtained by the student
+    total_marks = models.PositiveIntegerField()
+    grade = models.CharField(max_length=5)
+    result_lock = models.ForeignKey(
+        'ResultLock',
+        on_delete=models.CASCADE,
+        related_name='results',
+        to_field='title'  # Use the 'title' field as the reference
+    )  # Link to the ResultLock model
+
+    def __str__(self):
+        return f"{self.student.user.username} - {self.subject} ({self.marks})"
+
+    def clean(self):
+        """Validate that the result is being added within the active result lock period."""
+        if not self.result_lock.is_active():
+            raise ValidationError("Results can only be added during the active result lock period.")
+
+    def save(self, *args, **kwargs):
+        """Override the save method to enforce validation."""
+        self.clean()  # Run validation before saving
+        super().save(*args, **kwargs)

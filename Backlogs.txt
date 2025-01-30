@@ -1,6 +1,4 @@
 1) login via number.
-2) add design to webpages
 3) acc activation otp via number.
-4) Permission based on role.
 5) add more fields to student
 6) 

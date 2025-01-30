@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
-from .models import Attendance, AttendanceLock,CalendarEvent
-
 from accounts.models import Student
-from features.models import Announcement,Timetable
+from features.models import Announcement,Timetable,Attendance, AttendanceLock,CalendarEvent, Result, ResultLock
 
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,58 +77,35 @@ class TimetableSerializer(serializers.ModelSerializer):
         model = Timetable
         fields = '__all__'
 
-
-
-
-'''
-class ProfileSerializer(serializers.Serializer):
-    user = UserSerializer()
-    image = serializers.ImageField(required=False)
-    standard = StandardSerializer(required=False)
-    section = SectionSerializer(required=False)
-    title = serializers.CharField(max_length=255)
-    description = serializers.CharField(required=False)
-    student_profile = StudentsDBSerializer(required=False)  # Optional field for student profile
-    faculty_profile = FacultyDBSerializer(required=False) 
-
-    def validate(self, attrs):
-        # Add any custom validation if needed
-        return attrs
-
-
-
-class AssignmentSerializer(serializers.ModelSerializer):
+class ResultLockSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Assignment
-        fields = '__all__'
+        model = ResultLock
+        fields = ['id', 'title', 'start_date', 'end_date']
 
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = '__all__'
+        fields = ['id', 'student', 'subject', 'marks', 'total_marks', 'grade', 'result_lock']
+        
+    
 
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = '__all__'
+    def validate(self, data):
+        """
+        Validate that:
+        1. The result is being added during the active result lock period.
+        2. Marks do not exceed total marks.
+        3. Grade is calculated based on marks and total marks.
+        """
+        result_lock = data.get('result_lock')
+        marks = data.get('marks')
+        total_marks = data.get('total_marks')
+        grade = data.get('grade')
 
-class FeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Fee
-        fields = '__all__'
+        # Validate result lock period
+        if result_lock and not result_lock.is_active():
+            raise serializers.ValidationError("Results can only be added during the active result lock period. IN case the marks have to be changed, contact School Office.")
 
-class AttendanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attendance
-        fields = '__all__'
-
-class TimetableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Timetable
-        fields = '__all__'
-
-class CalendarEventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CalendarEvent
-        fields = '__all__'
-'''
+        # Validate marks and total marks
+        if marks and total_marks:
+            if marks > total_marks:
+                raise serializers.ValidationError("Marks cannot exceed total marks. Kindly Put appropriate marks!")
