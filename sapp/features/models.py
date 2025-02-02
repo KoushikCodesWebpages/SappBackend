@@ -67,29 +67,30 @@ class CalendarEvent(models.Model):
     def __str__(self):
         return f"{self.title} ({self.event_date})"
 
+import uuid
+from django.db import models
+
 class Timetable(models.Model):
-    # Fields
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    academic_year = models.CharField(max_length=9)  # Example: "2024-2025"
     standard = models.CharField(max_length=20)  # E.g., "7", "10"
     section = models.CharField(max_length=5)  # E.g., "A", "B"
-    subject = models.CharField(max_length=100)  # Subject name (e.g., "Mathematics")
-    faculty_name = models.CharField(max_length=255)  # Name of the assigned teacher/faculty
-    day = models.CharField(
-        max_length=10,
-        choices=[
-            ('Monday', 'Monday'),
-            ('Tuesday', 'Tuesday'),
-            ('Wednesday', 'Wednesday'),
-            ('Thursday', 'Thursday'),
-            ('Friday', 'Friday'),
-            ('Saturday', 'Saturday'),
-        ]
-    )  # Day of the week
-    start_time = models.TimeField()  # Start time of the class
-    end_time = models.TimeField()  # End time of the class
+    faculty_name = models.CharField(max_length=255)  # Assigned teacher
     created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp for creation
-    updated_at = models.DateTimeField(auto_now=True)  # Timestamp for last update
+    created_at = models.DateTimeField(auto_now_add=True)  
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    # Fields for each weekday containing lists of subjects/periods
+    monday = models.JSONField(default=list)  
+    tuesday = models.JSONField(default=list)
+    wednesday = models.JSONField(default=list)
+    thursday = models.JSONField(default=list)
+    friday = models.JSONField(default=list)
+
+    def __str__(self):
+        return f"{self.academic_year} | {self.standard}-{self.section} | {self.faculty_name}"
+
+
 
     def __str__(self):
         return f"{self.standard}-{self.section} | {self.subject} | {self.day} ({self.start_time} - {self.end_time})"

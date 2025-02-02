@@ -342,7 +342,18 @@ class TimetableView(APIView):
         Handle GET requests: Any authenticated user can fetch timetables.
         """
         try:
+            # Apply filters for standard "7" and section "C"
+            standard = request.query_params.get('standard', None)
+            section = request.query_params.get('section', None)
+
+            # Filtering based on query parameters
             timetables = Timetable.objects.all()
+
+            if standard:
+                timetables = timetables.filter(standard=standard)
+            if section:
+                timetables = timetables.filter(section=section)
+
             serializer = TimetableSerializer(timetables, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
