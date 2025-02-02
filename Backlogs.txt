@@ -1,4 +1,4 @@
 1) login via number.
 3) acc activation otp via number.
 5) add more fields to student
-6) 
+6) add small features later
