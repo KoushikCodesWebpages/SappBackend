@@ -29,9 +29,10 @@ AUTH_USER_MODEL = env('AUTH_USER_MODEL')
 # SECURITY WARNING: keep the secret key used in production secret!
 
 
-SECURE_SSL_REDIRECT = True
+'''SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+'''
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
