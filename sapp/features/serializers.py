@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.models import Student
-from features.models import Announcement,Timetable,Attendance, AttendanceLock,CalendarEvent, Result, ResultLock, Assignment, Submission
+from features.models import Announcement,Timetable,Attendance, AttendanceLock,CalendarEvent, Result, ResultLock, Assignment, Submission, Portion
 
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -129,4 +129,9 @@ class SubmissionMinSerializer(serializers.ModelSerializer):
 class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
+        fields = '__all__'
+        
+class PortionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portion
         fields = '__all__'

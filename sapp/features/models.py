@@ -148,7 +148,7 @@ class Assignment(models.Model):
     description = models.TextField()
     subject = models.CharField(max_length=255)
     mark = models.IntegerField(null=True, blank=True)  # Mark/grade for the assignment
-    faculty = models.ForeignKey('Faculty', on_delete=models.CASCADE, related_name='assignments')  # assuming Faculty model
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments')  # assuming Faculty model
     standard = models.CharField(max_length=100)
     section = models.CharField(max_length=100)
     academic_year = models.CharField(max_length=20)
@@ -163,7 +163,7 @@ class Assignment(models.Model):
 class Submission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for submission
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='submissions')  # assuming Student model
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='submissions')  # assuming Student model
     image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
     document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -180,3 +180,20 @@ class Submission(models.Model):
         if self.assignment.submissions.count() == self.assignment.faculty.students.count():
             self.assignment.completed = True
             self.assignment.save()
+            
+            
+class Portion(models.Model):
+    standard = models.CharField(max_length=50, help_text="Standard or grade level")
+    subject = models.CharField(max_length=100, help_text="Subject name")
+    academic_year = models.CharField(max_length=9, help_text="Academic year (e.g., 2024-2025)")
+    
+    unit = models.JSONField(help_text="List of unit names")
+    title = models.JSONField(help_text="List of portion titles")
+    description = models.TextField(blank=True, help_text="Detailed description of the portion")
+    reference = models.CharField(max_length=255, help_text="Reference information")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.standard} - {self.subject} - {', '.join(self.unit)} - {', '.join(self.title)}"

@@ -5,7 +5,12 @@ from django.conf.urls.static import static
 
 from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView, FilterStudentsView
 
-from features.views import AttendanceLockView,AttendanceDaysView, AttendanceView, AnnouncementView,AnnouncementMainDisplayView, CalendarEventView,TimetableView, ResultLockView, ResultAPIView, AssignmentView, SubmissionView
+from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
+from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
+from features.veiws.calendar import CalendarEventView
+from features.veiws.assignments import AssignmentView, SubmissionView
+from features.veiws.timetable import TimetableView
+from features.veiws.results import ResultLockView, ResultAPIView
 
 
 urlpatterns = [
@@ -53,9 +58,12 @@ urlpatterns = [
     path('office/timetables/<uuid:pk>/', TimetableView.as_view(), name='timetable-detail'),  # For retrieve, update, and delete
     
     #assignments
-     path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
+    path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
     #submissions
-     path('students/submissions/', SubmissionView.as_view(), name='submission-list'),
+    path('students/submissions/', SubmissionView.as_view(), name='submission-list'),
+     
+     
+     
 ]
 # Serving media files in development
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
