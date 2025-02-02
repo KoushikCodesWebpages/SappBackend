@@ -85,7 +85,7 @@ class ResultLockSerializer(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = ['id', 'student', 'subject', 'marks', 'total_marks', 'grade', 'result_lock']
+        fields = ['id', 'student','test_name', 'subject', 'marks', 'total_marks', 'grade', 'result_lock']
         
 
     def validate(self, data):

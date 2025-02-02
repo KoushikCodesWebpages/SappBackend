@@ -117,6 +117,7 @@ class Result(models.Model):
         related_name='results', 
         to_field='student_code')
     # Link to the Student model
+    test_name = models.CharField(max_length=100, unique=True)
     subject = models.CharField(max_length=100)  # Subject for which the result is recorded
     marks = models.PositiveIntegerField()  # Marks obtained by the student
     total_marks = models.PositiveIntegerField()
