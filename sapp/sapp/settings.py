@@ -13,29 +13,53 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
+SECRET_KEY = env('SECRET_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-AUTH_USER_MODEL = 'accounts.AuthUser' 
+AUTH_USER_MODEL = env('AUTH_USER_MODEL')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-==zm(j7@+k@2v6&kuoyk-5$6yu(2m9hbg@=5=irvnx@xl7f(_k'
 
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://127.0.0.1:3000').split(',')
 
 # Application definition
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 INSTALLED_APPS = [
@@ -48,12 +72,15 @@ INSTALLED_APPS = [
     'accounts',
     'features',
     'general',
+    
     'rest_framework',
     'rest_framework.authtoken',
-    'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'rest_framework_simplejwt'
+    
+    'corsheaders',
+    'axes',
 
 ]
 
@@ -67,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'sapp.urls'
@@ -90,47 +118,43 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sapp.wsgi.application'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Default to require authentication
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'general.utils.pagination.CustomPagination',  # Custom pagination class if defined
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',  # Enable filtering
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',  # Default to JSON responses
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [env('REST_FRAMEWORK_DEFAULT_AUTHENTICATION_CLASSES')],
+    'DEFAULT_PERMISSION_CLASSES': [env('REST_FRAMEWORK_DEFAULT_PERMISSION_CLASSES')],
+    'DEFAULT_PAGINATION_CLASS': env('REST_FRAMEWORK_DEFAULT_PAGINATION_CLASS'),
+    'DEFAULT_FILTER_BACKENDS': [env('REST_FRAMEWORK_DEFAULT_FILTER_BACKENDS')],
+    'DEFAULT_RENDERER_CLASSES': [env('REST_FRAMEWORK_DEFAULT_RENDERER_CLASSES')],
+    'DEFAULT_THROTTLE_CLASSES': env('REST_FRAMEWORK_DEFAULT_THROTTLE_CLASSES').split(','),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': env('REST_FRAMEWORK_DEFAULT_THROTTLE_RATES_ANON'),
+        'user': env('REST_FRAMEWORK_DEFAULT_THROTTLE_RATES_USER')
+    }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'koushikaltacc@gmail.com'  # Replace with your Gmail
-EMAIL_HOST_PASSWORD = 'jyec rlpd llho myhc'  # Replace with your email password or app-specific password
-DEFAULT_FROM_EMAIL = 'koushikaltacc@gmail.com'  # Default sender for emails
+
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token will expire in 60 minutes
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),      # Refresh token lasts 1 day
-    'ROTATE_REFRESH_TOKENS': True,                    # Rotate refresh tokens
-    'BLACKLIST_AFTER_ROTATION': True,                  # Blacklist old refresh tokens
-    'AUTH_HEADER_TYPES': ('Bearer',),                  # Define the authorization header type
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env('ACCESS_TOKEN_LIFETIME', default=60))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(env('REFRESH_TOKEN_LIFETIME', default=1440))),
+    'ROTATE_REFRESH_TOKENS': env('ROTATE_REFRESH_TOKENS', default=True, cast=bool),
+    'BLACKLIST_AFTER_ROTATION': env('BLACKLIST_AFTER_ROTATION', default=True, cast=bool),
+    'AUTH_HEADER_TYPES': tuple(env('AUTH_HEADER_TYPES', default='Bearer').split(',')),
 }
+
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(),  # Reads DATABASE_URL from .env
 }
 
 
@@ -173,10 +197,10 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Base directory where media files will be saved
-MEDIA_URL = '/media/'
+STATIC_URL = env('STATIC_URL')
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # For serving static files in development
-STATIC_URL = '/static/'
+MEDIA_URL = env('MEDIA_URL')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')

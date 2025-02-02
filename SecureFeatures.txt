@@ -5,3 +5,4 @@
 5, Username shouldnt contain @.
 6, Data is accessed via a security code that dynamically changes for each students (email-standard-section)
 7, User can access only their data
+8, Use this to scan "bandit -r sapp"
