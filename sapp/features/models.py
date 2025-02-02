@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django.utils.timezone import now
 
-from accounts.models import Student
+from accounts.models import Student, Faculty
 from django.core.exceptions import ValidationError
 
 class Attendance(models.Model):
@@ -140,3 +140,43 @@ class Result(models.Model):
         """Override the save method to enforce validation."""
         self.clean()  # Run validation before saving
         super().save(*args, **kwargs)
+
+
+class Assignment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for assignment
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    subject = models.CharField(max_length=255)
+    mark = models.IntegerField(null=True, blank=True)  # Mark/grade for the assignment
+    faculty = models.ForeignKey('Faculty', on_delete=models.CASCADE, related_name='assignments')  # assuming Faculty model
+    standard = models.CharField(max_length=100)
+    section = models.CharField(max_length=100)
+    academic_year = models.CharField(max_length=20)
+    completed = models.BooleanField(default=False)  # Flag for completed assignment
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+# Model for Submissions
+class Submission(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for submission
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='submissions')  # assuming Student model
+    image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
+    document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mark = models.IntegerField(null=True, blank=True)  # Individual mark for the submission
+    feedback = models.TextField(null=True, blank=True)  # Feedback from the faculty
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Submission by {self.student} for {self.assignment.title}"
+
+    def save(self, *args, **kwargs):
+        # Check if all submissions are made, if so, mark the assignment as completed
+        super().save(*args, **kwargs)
+        if self.assignment.submissions.count() == self.assignment.faculty.students.count():
+            self.assignment.completed = True
+            self.assignment.save()

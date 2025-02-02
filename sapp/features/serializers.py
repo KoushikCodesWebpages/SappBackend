@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.models import Student
-from features.models import Announcement,Timetable,Attendance, AttendanceLock,CalendarEvent, Result, ResultLock
+from features.models import Announcement,Timetable,Attendance, AttendanceLock,CalendarEvent, Result, ResultLock, Assignment, Submission
 
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
@@ -87,7 +87,6 @@ class ResultSerializer(serializers.ModelSerializer):
         model = Result
         fields = ['id', 'student', 'subject', 'marks', 'total_marks', 'grade', 'result_lock']
         
-    
 
     def validate(self, data):
         """
@@ -109,3 +108,25 @@ class ResultSerializer(serializers.ModelSerializer):
         if marks and total_marks:
             if marks > total_marks:
                 raise serializers.ValidationError("Marks cannot exceed total marks. Kindly Put appropriate marks!")
+            
+            
+            
+class AssignmentMinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assignment
+        fields = ['id', 'title','subject','completed','due_date']
+        
+class AssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assignment
+        fields = '__all__'
+        
+class SubmissionMinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = ['id', 'assignment_title', 'student', 'mark']
+        
+class SubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = '__all__'
