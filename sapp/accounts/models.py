@@ -39,7 +39,7 @@ class Student(models.Model):
 
 class Faculty(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='faculty_profile')
-    faculty_id = models.CharField(max_length=50, blank=True, null=True)
+    faculty_id = models.CharField(max_length=50,unique=True)
     department = models.CharField(max_length=100, blank=True)
     specialization = models.CharField(max_length=100, blank=True, null=True)
     coverage = models.JSONField(default=list)  # Updated from 'subjects'

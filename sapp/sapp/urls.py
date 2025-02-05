@@ -59,6 +59,7 @@ urlpatterns = [
     
     #assignments
     path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
+     path('faculty/assignments/<uuid:assignment_id>/', AssignmentView.as_view(), name='assignment_delete'),
     #submissions
     path('students/submissions/', SubmissionView.as_view(), name='submission-list'),
      

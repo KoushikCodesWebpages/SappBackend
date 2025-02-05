@@ -6,6 +6,10 @@ from general.utils.permissions import IsFaculty
 from features.models import Assignment, Submission
 from features.serializers import AssignmentSerializer, AssignmentMinSerializer, SubmissionSerializer, SubmissionMinSerializer
 from general.utils.permissions import IsFaculty, IsStudent
+from rest_framework import permissions
+
+from accounts.models import Student,Faculty
+from django.shortcuts import get_object_or_404
 
 
 
@@ -21,7 +25,7 @@ class AssignmentView(APIView):
             return [IsAuthenticated(), IsFaculty()]
         if self.request.method in ['GET']:
             # Faculty and Students can retrieve assignments
-            return [IsAuthenticated(), (IsFaculty() | IsStudent())]
+            return [IsAuthenticated(), permissions.OR(IsFaculty(), IsStudent())]
         if self.request.method == 'DELETE':
             # Only Faculty can delete assignments
             return [IsAuthenticated(), IsFaculty()]
@@ -43,7 +47,7 @@ class AssignmentView(APIView):
             queryset = queryset.filter(standard=standard)
 
         # Use the minimal serializer for GET requests
-        serializer = AssignmentMinSerializer(queryset, many=True)
+        serializer = AssignmentSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
@@ -58,26 +62,30 @@ class AssignmentView(APIView):
         # Use the full serializer for POST requests
         serializer = AssignmentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(faculty=request.user)  # Assign faculty as the creator of the assignment
+            faculty = Faculty.objects.get(user=request.user)
+            serializer.save(faculty=faculty)  # Assign faculty as the creator of the assignment
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, assignment_id, *args, **kwargs):
         """
-        Delete an assignment. Only faculty can delete assignments.
+        Delete an assignment. Only the faculty who created it can delete.
         """
         try:
+            # Fetch the assignment
             assignment = Assignment.objects.get(id=assignment_id)
+            
+            # Check if the user is the faculty who created the assignment
+            if assignment.faculty.user != request.user:
+                return Response({"error": "You do not have permission to delete this assignment."}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Proceed with the deletion
+            assignment.delete()
+            return Response({"message": "Assignment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
         except Assignment.DoesNotExist:
-            return Response({'detail': 'Assignment not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Assignment not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Ensure the requesting user is the faculty who created the assignment
-        if assignment.faculty != request.user:
-            return Response({'detail': 'Permission denied. You can only delete assignments created by you.'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        assignment.delete()
-        return Response({'detail': 'Assignment deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
     
     
     

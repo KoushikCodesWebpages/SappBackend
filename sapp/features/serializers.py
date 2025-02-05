@@ -120,6 +120,9 @@ class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
         fields = '__all__'
+        read_only_fields = ['faculty']
+        
+        
         
 class SubmissionMinSerializer(serializers.ModelSerializer):
     class Meta:

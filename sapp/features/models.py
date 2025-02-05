@@ -149,7 +149,8 @@ class Assignment(models.Model):
     description = models.TextField()
     subject = models.CharField(max_length=255)
     mark = models.IntegerField(null=True, blank=True)  # Mark/grade for the assignment
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments')  # assuming Faculty model
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments', to_field='faculty_id')
+    due_date = models.DateTimeField(null=True, blank=True)
     standard = models.CharField(max_length=100)
     section = models.CharField(max_length=100)
     academic_year = models.CharField(max_length=20)
