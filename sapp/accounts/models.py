@@ -6,7 +6,7 @@ class AuthUser(AbstractUser):
     ROLE_CHOICES = [
         ('student', 'Student'),
         ('faculty', 'Faculty'),
-        ('office_admin', 'Office Admin')
+        ('so_admin', 'SO Admin')
     ]
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=False, null=False)
@@ -69,7 +69,7 @@ class Faculty(models.Model):
         """
         return self.class_teacher
     
-class OfficeAdmin(models.Model):
+class SOAdmin(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='office_admin_profile')
     employee_id = models.CharField(max_length=50,blank=True, null=True)
     school_name = models.CharField(max_length=100)

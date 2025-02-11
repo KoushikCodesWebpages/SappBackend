@@ -13,9 +13,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser,AllowAny
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.models import AuthUser, Student, Faculty, OfficeAdmin
-from .serializers import StudentNavbarSerializer,StudentProfileSerializer,FacultyNavbarSerializer,FacultyProfileSerializer
-
+from accounts.models import AuthUser, Student, Faculty, SOAdmin
+from .serializers import StudentProfileSerializer,FacultyProfileSerializer, SOProfileSerializer
 
 
 from django.contrib.auth.hashers import make_password
@@ -42,14 +41,14 @@ class ExcelUploadView(APIView):
             # Iterate through the rows and create users based on role
             for index, row in df.iterrows():
                 role = row.get('role')
-                if not role or role not in ['student', 'faculty', 'office_admin']:
+                if not role or role not in ['student', 'faculty', 'so_admin']:
                     return Response({"error": f"Invalid role at row {index+1}"}, status=status.HTTP_400_BAD_REQUEST)
 
                 if role == 'student':
                     self.create_student(row, index)
                 elif role == 'faculty':
                     self.create_faculty(row, index)
-                elif role == 'office_admin':
+                elif role == 'so_admin':
                     self.create_office_admin(row, index)
 
             return Response({"message": "Data uploaded successfully"}, status=status.HTTP_201_CREATED)
@@ -130,7 +129,7 @@ class ExcelUploadView(APIView):
             user_data = {
                 'username': row['username'],
                 'email': row['email'],
-                'role': 'office_admin',
+                'role': 'so_admin',
                 'password': row['password']  # Store the hashed password
             }
             user = get_user_model().objects.create_user(**user_data)
@@ -143,7 +142,7 @@ class ExcelUploadView(APIView):
                 'employee_id': row.get('employee_id', ''),  # Optional field
                 'school_name': row['school_name']
             }
-            OfficeAdmin.objects.create(**office_admin_data)
+            SOAdmin.objects.create(**office_admin_data)
 
         except Exception as e:
             raise Exception(f"Error creating office admin at row {index+1}: {e}")
@@ -188,7 +187,7 @@ class LoginView(APIView):
 
         
         
-class StudentNavbarView(APIView):
+'''class StudentNavbarView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -196,6 +195,7 @@ class StudentNavbarView(APIView):
         student = request.user.student_profile
         serializer = StudentNavbarSerializer(student)
         return Response(serializer.data)
+'''
 
 class StudentProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -233,7 +233,7 @@ class StudentProfileView(APIView):
         # If no student_code is provided, return an error
         return Response({"error": "Student code is required."}, status=status.HTTP_400_BAD_REQUEST)
     
-class FacultyNavbarView(APIView):
+'''class FacultyNavbarView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -241,6 +241,7 @@ class FacultyNavbarView(APIView):
         faculty = request.user.faculty_profile
         serializer = FacultyNavbarSerializer(faculty)
         return Response(serializer.data)
+'''
 
 class FacultyProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -266,11 +267,30 @@ class FacultyProfileView(APIView):
         # Return errors if any occur during validation
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class SOProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch the profile data for the logged-in faculty."""
+        admin = request.user.soadmin_profile
+        serializer = SOProfileSerializer(admin)
+        return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        """Update the profile data for the logged-in faculty and user."""
+        admin = request.user.soadmin_profile
+        serializer = SOProfileSerializer(admin, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            # Save the updated data
+            serializer.save()
+
+            # Return the updated data as response
+            return Response(serializer.data)
+
+        # Return errors if any occur during validation
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
     
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
 
 class FilterStudentsView(APIView):
     permission_classes = [IsAuthenticated]

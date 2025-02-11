@@ -3,7 +3,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from accounts.views import ExcelUploadView, LoginView, StudentNavbarView,StudentProfileView,FacultyNavbarView,FacultyProfileView, FilterStudentsView
+from accounts.views import ExcelUploadView, LoginView,StudentProfileView,FacultyProfileView, SOProfileView, FilterStudentsView
 
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
@@ -22,11 +22,13 @@ urlpatterns = [
      path('login/',LoginView.as_view(),name='login'),
      
     #profile
-     path('student/navbar/',StudentNavbarView.as_view(),name='student-navbar'),
+     #path('student/navbar/',StudentNavbarView.as_view(),name='student-navbar'),
      path('student/profile/',StudentProfileView.as_view(),name='student-profile'),
-     path('faculty/navbar/',FacultyNavbarView.as_view(),name='student-navbar'),
-     path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
      path('student-profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
+     #path('faculty/navbar/',FacultyNavbarView.as_view(),name='student-navbar'),
+     path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
+     path('soadmin/profile/',SOProfileView.as_view(),name='soadmin-profile'),
+     
      
      
     #default
