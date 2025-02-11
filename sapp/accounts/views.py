@@ -184,7 +184,6 @@ class LoginView(APIView):
         # Return the JWT tokens
         return Response({
             "access_token": str(access_token),
-            "refresh_token": str(refresh)
         }, status=status.HTTP_200_OK)
 
         
