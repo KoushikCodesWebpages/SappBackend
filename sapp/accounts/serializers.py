@@ -20,18 +20,18 @@ class AuthUserSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects', 'attendance_percent']
+        fields = ['user', 'enrollment_number', 'standard', 'section','academic_year', 'subjects', 'attendance_percent','image']
 
 # Faculty Serializer
 class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
-        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher']
+        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image']
         
 class OfficeAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfficeAdmin
-        fields = ['user','employee_id','school_name']
+        fields = ['user','employee_id','school_name','image']
         
 class ExcelUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
@@ -50,7 +50,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','student_code','image']
+        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','image']
 
     def update(self, instance, validated_data):
         # Handle user update (username, email)

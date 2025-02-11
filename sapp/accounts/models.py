@@ -21,10 +21,11 @@ class Student(models.Model):
     enrollment_number = models.CharField(max_length=50, unique=True)
     standard = models.PositiveIntegerField()
     section = models.CharField(max_length=10, blank=True, null=True)
+    academic_year = models.CharField(max_length=20)
     subjects = models.JSONField(default=list)
     attendance_percent = models.PositiveIntegerField(default=0)
     student_code = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    academic_year = models.CharField(max_length=20)  # New field for academic year
+      # New field for academic year
     image = models.ImageField(upload_to='students/pics/', blank=True, null=True)
     
     def save(self, *args, **kwargs):

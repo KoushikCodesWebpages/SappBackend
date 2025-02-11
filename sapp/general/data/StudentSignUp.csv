@@ -1,11 +1,11 @@
 username,email,password,role,enrollment_number,standard,section,subjects,attendance_percent,academic_year
-student1@student.com,student1@student.com,password123,student,ENR001,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student2@student.com,student2@student.com,password123,student,ENR002,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student3@student.com,student3@student.com,password123,student,ENR003,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student4@student.com,student4@student.com,password123,student,ENR004,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student5@student.com,student5@student.com,password123,student,ENR005,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student6@student.com,student6@student.com,password123,student,ENR006,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student7@student.com,student7@student.com,password123,student,ENR007,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student8@student.com,student8@student.com,password123,student,ENR008,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student9@student.com,student9@student.com,password123,student,ENR009,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
-student10@student.com,student10@student.com,password123,student,ENR010,7,C,"['Math', 'Science', 'English','History', 'Geography']",0,2024-2025
+student1,student1@student.com,password123,student,ENR001,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student2,student2@student.com,password123,student,ENR002,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student3,student3@student.com,password123,student,ENR003,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student4,student4@student.com,password123,student,ENR004,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student5,student5@student.com,password123,student,ENR005,9,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student6,student6@student.com,password123,student,ENR006,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student7,student7@student.com,password123,student,ENR007,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student8,student8@student.com,password123,student,ENR008,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student9,student9@student.com,password123,student,ENR009,7,C,"['Math', 'Science', 'English', 'History', 'Geography']",0,2024-2025
+student10,student10@student.com,password123,student,ENR010,7,C,"['Math', 'Science', 'English','History', 'Geography']",0,2024-2025
