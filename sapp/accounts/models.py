@@ -31,7 +31,7 @@ class Student(models.Model):
     def save(self, *args, **kwargs):
         # Automatically generate the student_code before saving
         if not self.student_code:
-            self.student_code = f"{self.user.username}-{self.standard}-{self.section}"
+            self.student_code = f"{self.user.username}-{self.standard}-{self.section}-{self.academic_year}"
         super().save(*args, **kwargs)
         
     def __str__(self):

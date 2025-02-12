@@ -6,15 +6,19 @@ from accounts.models import Student, Faculty
 from django.core.exceptions import ValidationError
 
 class Attendance(models.Model):
-    student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
     date = models.DateField()
+    student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=[('present', 'Present'), ('absent', 'Absent')])
 
+    class Meta:
+        unique_together = ('student', 'date')
+        
     def __str__(self):
         return f"Attendance for {self.student.username} on {self.date}: {self.status}"
     
+    
 class AttendanceLock(models.Model):
-    date = models.DateField()
+    date = models.DateField(primary_key=True,editable=False)
     is_locked = models.BooleanField(default=False)
 
     def __str__(self):
@@ -33,7 +37,7 @@ class Announcement(models.Model):
     till = models.DateTimeField()
     created_by = models.CharField(max_length=255)  # Admin's username or email
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)  
 
     # Methods
     @classmethod

@@ -75,7 +75,7 @@ class ExcelUploadView(APIView):
             user.save()  # Save the user after setting the hashed password
 
             # Generate the student_code in the format email-standard-section
-            student_code = f"{row['email']}-{row['standard']}-{row.get('section', '')}"
+            student_code = f"{row['email']}-{row['standard']}-{row.get('section', '')}-{row['academic_year']}"
 
             # Create the related Student model
             student_data = {

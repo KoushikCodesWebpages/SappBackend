@@ -1,6 +1,6 @@
 username,email,password,role,faculty_id,department,specialization,coverage,class_teacher
-faculty1,faculty1@school.com,password123,faculty,F001,Science,Physics,"[['7', 'C', 'Science', '2024-2025'], ['8', 'B', 'Math', '2024-2025']]","['7', 'C', '2024-2025']"
+faculty1,faculty1@school.com,password123,faculty,F001,Science,Physics,"[['7', 'C', 'Science', '2024-2025'], ['9', 'C', 'Math', '2024-2025']]","['9', 'C', '2024-2025']"
 faculty2,faculty2@school.com,password123,faculty,F002,Science,Chemistry,"[['9', 'C', 'Chemistry', '2024-2025']]","[]"
-faculty3,faculty3@school.com,password123,faculty,F003,Math,Algebra,"[['9', 'C', 'Math', '2024-2025']]","[]"
-faculty4,faculty4@school.com,password123,faculty,F004,Science,Biology,"[['7', 'C', 'Biology', '2024-2025']]","['9', 'C', '2024-2025']"
-faculty5,faculty5@school.com,password123,faculty,F005,Math,Geometry,"[['8', 'B', 'Math', '2024-2025']]","[]"
+faculty3,faculty3@school.com,password123,faculty,F003,Math,Algebra,"[['9', 'C', 'English', '2024-2025']]","[]"
+faculty4,faculty4@school.com,password123,faculty,F004,Science,Biology,"[['7', 'C', 'Biology', '2024-2025']]","['7', 'C', '2024-2025']"
+faculty5,faculty5@school.com,password123,faculty,F005,Math,Geometry,"[['8', 'C', 'Math', '2024-2025']]","[]"
