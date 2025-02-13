@@ -6,11 +6,25 @@ from rest_framework.views import APIView
 from features.models import CalendarEvent
 from features.serializers import CalendarEventSerializer
 
+from general.utils.permissions import IsFaculty,IsOfficeAdmin,IsStudent
+
 
 
 
 class CalendarEventView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+
+    def get_permissions(self):
+        """Dynamically assign permissions based on request method."""
+        if self.request.method == "POST":
+            # Only office_admin can create an event
+            return [IsAuthenticated(), IsOfficeAdmin()]
+        elif self.request.method == "GET":
+            # Any authenticated user can view events
+            return [IsAuthenticated()]
+        elif self.request.method == "DELETE":
+            # Only office_admin can delete an event
+            return [IsAuthenticated(), IsOfficeAdmin()]
 
     def get(self, request, *args, **kwargs):
         """
@@ -27,9 +41,6 @@ class CalendarEventView(APIView):
             )
 
     def post(self, request):
-        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
-            return Response({"error": "Only office_admin can create announcements."}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = CalendarEventSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(created_by=request.user.username)  # Log the admin creating the announcement
@@ -40,13 +51,6 @@ class CalendarEventView(APIView):
         """
         Handle DELETE requests: Only office admins can delete events.
         """
-        # Check if the user is an office admin
-        if request.user.role != 'office_admin':
-            return Response(
-                {'detail': 'You do not have permission to delete events.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         event_id = kwargs.get('pk')
         try:
             event = CalendarEvent.objects.get(id=event_id)
@@ -59,5 +63,3 @@ class CalendarEventView(APIView):
                 {'detail': f'Error deleting event: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
-  
