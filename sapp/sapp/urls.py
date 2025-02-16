@@ -6,14 +6,15 @@ from rest_framework.routers import DefaultRouter
 
 
 
-from accounts.views import ExcelUploadView, LoginView,StudentProfileView,FacultyProfileView, SOProfileView, FilterStudentsView, StudentViewSet,FacultyViewSet,OfficeAdminViewSet
-
+from accounts.views import ExcelUploadView, LoginView,StudentViewSet,FacultyViewSet,OfficeAdminViewSet
+from features.veiws.profile import StudentProfileView, SOProfileView, FacultyProfileView
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
 from features.veiws.calendar import CalendarEventView
 from features.veiws.assignments import AssignmentView, SubmissionView
 from features.veiws.timetable import TimetableView
 from features.veiws.results import ResultLockView, ResultAPIView
+from features.veiws.defaults import AdminDashboardAPIView, FilterStudentsView
 
 
 
@@ -42,8 +43,11 @@ urlpatterns = [
      
      
     #default
+    
+    path("dashboard/stats/", AdminDashboardAPIView.as_view(), name="dashboard-stats"),
     path('faculty/filter-students/', FilterStudentsView.as_view(), name ='filter-students'),
-     
+    
+         
     #attendance
     path('office/attendancelock/', AttendanceLockView.as_view(),name='attendancelock'),
     path('office/attendancedays/', AttendanceDaysView.as_view(), name='attendance-days'),

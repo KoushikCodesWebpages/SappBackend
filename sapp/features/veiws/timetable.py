@@ -5,27 +5,35 @@ from rest_framework.views import APIView
 
 
 from features.models import Timetable
-from features.serializers import TimetableSerializer 
+from features.serializers import TimetableSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
 
-
+from general.utils.permissions import IsFaculty, IsStudent  # Assuming you have these custom permissions
 
 class TimetableView(APIView):
-    permission_classes = [IsAuthenticated]
     """
     Handle GET, POST, PUT, and DELETE requests for Timetable objects.
     """
+    def get_permissions(self):
+        """Dynamically assign permissions based on request method."""
+        if self.request.method in ["POST", "PUT"]:
+            return [permissions.IsAuthenticated(), IsFaculty()]  # Only Faculty can create/update
+        elif self.request.method == "GET":
+            return [permissions.IsAuthenticated(), permissions.OR(IsFaculty(), IsStudent())]  # Faculty & Students can view
+        return [permissions.IsAuthenticated()]  # Default case (shouldn't happen)
+
     def get(self, request, *args, **kwargs):
         """
-        Handle GET requests: Any authenticated user can fetch timetables.
+        Handle GET requests: Any authenticated Faculty or Student can fetch timetables.
         """
         try:
-            # Apply filters for standard "7" and section "C"
+            # Apply filters for standard and section if provided
             standard = request.query_params.get('standard', None)
             section = request.query_params.get('section', None)
 
-            # Filtering based on query parameters
             timetables = Timetable.objects.all()
-
             if standard:
                 timetables = timetables.filter(standard=standard)
             if section:
@@ -41,24 +49,18 @@ class TimetableView(APIView):
 
     def post(self, request):
         """
-        Handle POST requests: Only office_admins can create timetables.
+        Handle POST requests: Only Faculty can create timetables.
         """
-        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
-            return Response({"error": "Only office_admin can create timetables."}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = TimetableSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user.username)  # Log the admin creating the timetable
+            serializer.save(created_by=request.user.username)  # Log the faculty creating the timetable
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, *args, **kwargs):
         """
-        Handle PUT requests: Only office_admins can update timetables.
+        Handle PUT requests: Only Faculty can update timetables.
         """
-        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
-            return Response({"error": "Only office_admin can update timetables."}, status=status.HTTP_403_FORBIDDEN)
-
         timetable_id = kwargs.get('pk')
         try:
             timetable = Timetable.objects.get(id=timetable_id)
@@ -77,14 +79,8 @@ class TimetableView(APIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        Handle DELETE requests: Only office_admins can delete timetables.
+        Handle DELETE requests: Only Faculty can delete timetables.
         """
-        if not request.user.role == 'office_admin':  # Check if the user is an office_admin
-            return Response(
-                {'detail': 'You do not have permission to delete timetables.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         timetable_id = kwargs.get('pk')
         try:
             timetable = Timetable.objects.get(id=timetable_id)
@@ -97,4 +93,3 @@ class TimetableView(APIView):
                 {'detail': f'Error deleting timetable: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
- 
