@@ -18,17 +18,20 @@ class AuthUserSerializer(serializers.ModelSerializer):
 
 # Student Serializer
 class StudentSerializer(serializers.ModelSerializer):
+    user = AuthUserSerializer()
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section','academic_year', 'subjects', 'attendance_percent','image']
+        fields = ['user', 'enrollment_number', 'standard', 'section','academic_year', 'subjects', 'attendance_percent','image','student_code']
 
 # Faculty Serializer
 class FacultySerializer(serializers.ModelSerializer):
+    user = AuthUserSerializer()
     class Meta:
         model = Faculty
         fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image']
         
 class OfficeAdminSerializer(serializers.ModelSerializer):
+    user = AuthUserSerializer()
     class Meta:
         model = SOAdmin
         fields = ['user','employee_id','school_name','image']
@@ -51,7 +54,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','image','student_code']
+        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','image']
 
     def update(self, instance, validated_data):
         # Handle user update (username, email)

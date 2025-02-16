@@ -1,9 +1,12 @@
-from django.contrib import admin
-from django.urls import path
+from django.contrib import admin 
+from django.urls import path,  include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
 
-from accounts.views import ExcelUploadView, LoginView,StudentProfileView,FacultyProfileView, SOProfileView, FilterStudentsView
+
+
+from accounts.views import ExcelUploadView, LoginView,StudentProfileView,FacultyProfileView, SOProfileView, FilterStudentsView, StudentViewSet,FacultyViewSet,OfficeAdminViewSet
 
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
@@ -13,6 +16,12 @@ from features.veiws.timetable import TimetableView
 from features.veiws.results import ResultLockView, ResultAPIView
 
 
+
+router = DefaultRouter()
+router.register(r'students', StudentViewSet)
+router.register(r'faculty', FacultyViewSet)
+router.register(r'soadmin', OfficeAdminViewSet)
+
 urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
@@ -20,7 +29,8 @@ urlpatterns = [
     # Authentication
      path('upload-excel-signup/', ExcelUploadView.as_view(), name='upload-excel'),
      path('login/',LoginView.as_view(),name='login'),
-     
+        
+    path('', include(router.urls)), 
     #profile
      #path('student/navbar/',StudentNavbarView.as_view(),name='student-navbar'),
      path('student/profile/',StudentProfileView.as_view(),name='student-profile'),

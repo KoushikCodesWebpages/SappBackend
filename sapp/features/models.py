@@ -132,6 +132,9 @@ class Result(models.Model):
         related_name='results',
         to_field='title'  # Use the 'title' field as the reference
     )  # Link to the ResultLock model
+    created_by = models.CharField(max_length=255)  # Admin's username or email
+    created_at = models.DateTimeField(auto_now_add=True)  
+    updated_at = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
         return f"{self.student.user.username} - {self.subject} ({self.marks})"
@@ -159,7 +162,9 @@ class Assignment(models.Model):
     section = models.CharField(max_length=100)
     academic_year = models.CharField(max_length=20)
     completed = models.BooleanField(default=False)  # Flag for completed assignment
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=255)  # Admin's username or email
+    created_at = models.DateTimeField(auto_now_add=True)  
+    updated_at = models.DateTimeField(auto_now=True) 
 
     def __str__(self):
         return self.title

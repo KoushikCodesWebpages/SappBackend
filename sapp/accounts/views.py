@@ -2,24 +2,23 @@ import pandas as pd
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.core.exceptions import ValidationError
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
-
+from rest_framework import viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from rest_framework.permissions import IsAuthenticated, IsAdminUser,AllowAny
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
+import pandas as pd
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import AuthUser, Student, Faculty, SOAdmin
-from .serializers import StudentProfileSerializer,FacultyProfileSerializer, SOProfileSerializer
+from .serializers import StudentProfileSerializer,FacultyProfileSerializer, SOProfileSerializer, StudentSerializer,FacultySerializer,OfficeAdminSerializer
+
+from general.utils.permissions import IsFaculty,IsOfficeAdmin,IsStudent
 
 
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model
-import pandas as pd
 
 class ExcelUploadView(APIView):
     permission_classes = [AllowAny]
@@ -196,6 +195,35 @@ class LoginView(APIView):
         serializer = StudentNavbarSerializer(student)
         return Response(serializer.data)
 '''
+
+
+class StudentViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated, IsOfficeAdmin]  # Only SOAdmin can access
+
+class FacultyViewSet(viewsets.ModelViewSet):
+    queryset = Faculty.objects.all()
+    serializer_class = FacultySerializer
+    permission_classes = [IsAuthenticated,  IsOfficeAdmin]  # Only SOAdmin can access
+
+class OfficeAdminViewSet(viewsets.ModelViewSet):
+    queryset = SOAdmin.objects.all()
+    serializer_class = OfficeAdminSerializer
+    permission_classes = [IsAuthenticated,  IsOfficeAdmin]
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class StudentProfileView(APIView):
     permission_classes = [IsAuthenticated]
