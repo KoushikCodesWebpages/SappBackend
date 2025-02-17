@@ -4,9 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 
-
-
 from accounts.views import ExcelUploadView, LoginView,StudentViewSet,FacultyViewSet,OfficeAdminViewSet
+
 from features.veiws.profile import StudentProfileView, SOProfileView, FacultyProfileView
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
@@ -44,7 +43,7 @@ urlpatterns = [
      
     #default
     
-    path("dashboard/stats/", AdminDashboardAPIView.as_view(), name="dashboard-stats"),
+    path("office/dashboard/", AdminDashboardAPIView.as_view(), name="dashboard-stats"),
     path('faculty/filter-students/', FilterStudentsView.as_view(), name ='filter-students'),
     
          

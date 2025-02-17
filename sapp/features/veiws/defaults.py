@@ -9,13 +9,13 @@ class AdminDashboardAPIView(APIView):
 
     def get(self, request):
         total_students = Student.objects.count()
-        total_verified_accounts = AuthUser.objects.filter(is_verified=True).count()  # Assuming 'is_verified' field
+        total_verified_accounts = AuthUser.objects.filter(is_verified=False).count()  # Assuming 'is_verified' field
         total_teachers = Faculty.objects.count()
         #total_complaints = Complaint.objects.count()
 
         data = {
             "total_students": total_students,
-            "total_verified_accounts": total_verified_accounts,
+            "total_unverified_accounts": total_verified_accounts,
             "total_teachers": total_teachers,
             #"total_complaints": total_complaints,
         }

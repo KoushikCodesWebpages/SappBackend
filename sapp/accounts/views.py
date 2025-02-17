@@ -15,7 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters.rest_framework import DjangoFilterBackend
 
 from accounts.models import AuthUser, Student, Faculty, SOAdmin
-from .serializers import StudentProfileSerializer,FacultyProfileSerializer, SOProfileSerializer, StudentSerializer,FacultySerializer,OfficeAdminSerializer
+from .serializers import StudentSerializer,FacultySerializer,OfficeAdminSerializer
 
 from general.utils.permissions import IsFaculty,IsOfficeAdmin,IsStudent
 

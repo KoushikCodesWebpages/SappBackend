@@ -1,4 +1,4 @@
 *.pyc
 __pycache__/
 sapp/backend/migrations/__pycache__
-sapp/.env
+sapp/sapp/.env
