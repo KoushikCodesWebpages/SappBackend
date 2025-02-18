@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 import pandas as pd
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 
 from accounts.models import Student, Faculty
 from features.serializers import StudentProfileSerializer,FacultyProfileSerializer, SOProfileSerializer
@@ -69,17 +69,19 @@ class StudentProfileView(APIView):
 '''
 
 class FacultyProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    
+    permission_classes = [IsAuthenticated, IsFaculty]
+        
 
     def get(self, request, *args, **kwargs):
         """Fetch the profile data for the logged-in faculty."""
-        faculty = request.user.faculty_profile
+        faculty = Faculty.objects.get(user=request.user)
         serializer = FacultyProfileSerializer(faculty)
         return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
         """Update the profile data for the logged-in faculty and user."""
-        faculty = request.user.faculty_profile
+        faculty = Faculty.objects.get(user=request.user)
         serializer = FacultyProfileSerializer(faculty, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -97,13 +99,13 @@ class SOProfileView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Fetch the profile data for the logged-in faculty."""
-        admin = request.user.soadmin_profile
+        admin = request.user.office_admin_profile
         serializer = SOProfileSerializer(admin)
         return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
         """Update the profile data for the logged-in faculty and user."""
-        admin = request.user.soadmin_profile
+        admin = request.user.office_admin_profile
         serializer = SOProfileSerializer(admin, data=request.data, partial=True)
 
         if serializer.is_valid():

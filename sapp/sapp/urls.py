@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path,  include
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
 
+from rest_framework import routers
 from accounts.views import ExcelUploadView, LoginView,StudentViewSet,FacultyViewSet,OfficeAdminViewSet
 
 from features.veiws.profile import StudentProfileView, SOProfileView, FacultyProfileView
@@ -17,10 +17,11 @@ from features.veiws.defaults import AdminDashboardAPIView, FilterStudentsView
 
 
 
-router = DefaultRouter()
-router.register(r'students', StudentViewSet)
-router.register(r'faculty', FacultyViewSet)
-router.register(r'soadmin', OfficeAdminViewSet)
+router = routers.DefaultRouter()
+router.register('studentslist', StudentViewSet)
+router.register('facultylist', FacultyViewSet)
+router.register('soadminlist', OfficeAdminViewSet)
+
 
 urlpatterns = [
     # Admin panel
@@ -34,7 +35,7 @@ urlpatterns = [
     #profile
      #path('student/navbar/',StudentNavbarView.as_view(),name='student-navbar'),
      path('student/profile/',StudentProfileView.as_view(),name='student-profile'),
-     path('student-profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
+     path('student/profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
      #path('faculty/navbar/',FacultyNavbarView.as_view(),name='student-navbar'),
      path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
      path('soadmin/profile/',SOProfileView.as_view(),name='soadmin-profile'),
