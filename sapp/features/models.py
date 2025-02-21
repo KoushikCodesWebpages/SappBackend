@@ -18,8 +18,12 @@ class Attendance(models.Model):
     
     
 class AttendanceLock(models.Model):
-    date = models.DateField(primary_key=True,editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    date = models.DateField()
     is_locked = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('id', 'date')
 
     def __str__(self):
         return f"Attendance lock for {self.date}: {'Locked' if self.is_locked else 'Open'}"
