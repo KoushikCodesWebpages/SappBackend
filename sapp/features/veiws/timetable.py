@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from general.utils.permissions import IsFaculty, IsStudent  # Assuming you have these custom permissions
+from general.utils.permissions import IsFaculty, IsStudent, IsOfficeAdmin # Assuming you have these custom permissions
 
 class TimetableView(APIView):
     """
@@ -19,9 +19,9 @@ class TimetableView(APIView):
     def get_permissions(self):
         """Dynamically assign permissions based on request method."""
         if self.request.method in ["POST", "PUT"]:
-            return [permissions.IsAuthenticated(), IsFaculty()]  # Only Faculty can create/update
+            return [permissions.IsAuthenticated(), IsOfficeAdmin]  # Only Faculty can create/update
         elif self.request.method == "GET":
-            return [permissions.IsAuthenticated(), permissions.OR(IsFaculty(), IsStudent())]  # Faculty & Students can view
+            return [permissions.IsAuthenticated()]  # Faculty & Students can view
         return [permissions.IsAuthenticated()]  # Default case (shouldn't happen)
 
     def get(self, request, *args, **kwargs):
