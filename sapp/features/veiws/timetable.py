@@ -19,7 +19,7 @@ class TimetableView(APIView):
     def get_permissions(self):
         """Dynamically assign permissions based on request method."""
         if self.request.method in ["POST", "PUT"]:
-            return [permissions.IsAuthenticated(), IsOfficeAdmin]  # Only Faculty can create/update
+            return [permissions.IsAuthenticated(), IsOfficeAdmin()]  # Only Faculty can create/update
         elif self.request.method == "GET":
             return [permissions.IsAuthenticated()]  # Faculty & Students can view
         return [permissions.IsAuthenticated()]  # Default case (shouldn't happen)
