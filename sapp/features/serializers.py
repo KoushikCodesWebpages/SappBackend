@@ -145,9 +145,11 @@ class TimetableSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ResultLockSerializer(serializers.ModelSerializer):
+    is_active = serializers.BooleanField(read_only=True)  # Include computed field
+
     class Meta:
         model = ResultLock
-        fields = ['id', 'title', 'start_date', 'end_date']
+        fields = ['id', 'title', 'start_date', 'end_date','last_updated', 'is_active']  # Added `is_active`
 
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:

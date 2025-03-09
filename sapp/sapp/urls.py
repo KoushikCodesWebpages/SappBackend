@@ -12,7 +12,7 @@ from features.veiws.announcements import AnnouncementView,AnnouncementMainDispla
 from features.veiws.calendar import CalendarEventView
 from features.veiws.assignments import AssignmentView, SubmissionView
 from features.veiws.timetable import TimetableView
-from features.veiws.results import ResultLockView, ResultAPIView
+from features.veiws.results import ResultLockView, ResultAPIView,ResultLockDetailView
 from features.veiws.defaults import AdminDashboardAPIView, FilterStudentsView
 
 
@@ -28,22 +28,19 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Authentication
-     path('upload-excel-signup/', ExcelUploadView.as_view(), name='upload-excel'),
-     path('login/',LoginView.as_view(),name='login'),
-        
+    path('upload-excel-signup/', ExcelUploadView.as_view(), name='upload-excel'),
+    path('login/',LoginView.as_view(),name='login'),
+    
     path('', include(router.urls)), 
+    
     #profile
-     #path('student/navbar/',StudentNavbarView.as_view(),name='student-navbar'),
-     path('student/profile/',StudentProfileView.as_view(),name='student-profile'),
-     path('student/profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
-     #path('faculty/navbar/',FacultyNavbarView.as_view(),name='student-navbar'),
-     path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
-     path('soadmin/profile/',SOProfileView.as_view(),name='soadmin-profile'),
-     
+    path('student/profile/',StudentProfileView.as_view(),name='student-profile'),
+    path('student/profile/<str:student_code>/', StudentProfileView.as_view(), name='student-profile'),
+    path('faculty/profile/',FacultyProfileView.as_view(),name='faculty-profile'),
+    path('soadmin/profile/',SOProfileView.as_view(),name='soadmin-profile'),
      
      
     #default
-    
     path("office/dashboard/", AdminDashboardAPIView.as_view(), name="dashboard-stats"),
     path('faculty/filter-students/', FilterStudentsView.as_view(), name ='filter-students'),
     
@@ -54,12 +51,14 @@ urlpatterns = [
     path('class/attendance/', AttendanceView.as_view(), name='attendance-list'),
     path('class/attendance/<str:student_code>/', AttendanceView.as_view(), name='attendance-detail'),
     
-    path('results/', ResultAPIView.as_view(), name='result-list'),
-    path('results/<int:pk>/', ResultAPIView.as_view(), name='result-detail'),
+    #resultlock
+    path('result-locks/', ResultLockView.as_view(), name='result-lock-list'),
+    path('result-locks/<int:pk>/', ResultLockDetailView.as_view(), name='result-lock-detail'),
     
     #results
-    path('office/resultlock/', ResultLockView.as_view(),name= "resultlock"),
-    path('office/resultlock/<int:pk>/', ResultLockView.as_view(),name= "resultlock-detail"),
+    path('results/', ResultAPIView.as_view(), name='result-list'),
+    path('results/<int:pk>/', ResultAPIView.as_view(), name='result-detail'),
+
     
     #announcement
     path('office/announcementdisplay/',AnnouncementMainDisplayView.as_view(),name='announcement'),
@@ -78,6 +77,7 @@ urlpatterns = [
      path('faculty/assignments/<uuid:assignment_id>/', AssignmentView.as_view(), name='assignment_delete'),
     #submissions
     path('students/submissions/', SubmissionView.as_view(), name='submission-list'),
+    path('students/submissions/<uuid:assignment_id>', SubmissionView.as_view(), name='submission-list'),
      
      
      

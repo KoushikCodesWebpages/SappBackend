@@ -101,17 +101,20 @@ class Timetable(models.Model):
 
 
 class ResultLock(models.Model):
-    title = models.CharField(max_length=100, unique=True)  # Unique title for the result lock
-    start_date = models.DateField()  # Start date for result submission
-    end_date = models.DateField()  # End date for result submission
+    title = models.CharField(max_length=100, unique=True, db_index=True)  # Indexed for faster lookups
+    start_date = models.DateField(db_index=True)  # Indexed to speed up range queries
+    end_date = models.DateField(db_index=True)  # Indexed for efficient filtering
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.title} ({self.start_date} to {self.end_date})"
 
+    @property
     def is_active(self):
         """Check if the result lock is currently active."""
-        from django.utils import timezone
-        return self.start_date <= timezone.now().date() <= self.end_date
+        today = now().date()
+        return self.start_date <= today <= self.end_date
+
     
     
 class Result(models.Model):
