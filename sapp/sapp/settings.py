@@ -74,8 +74,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'features',
-    'general',
-    
+    'general',    
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
@@ -98,6 +97,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
+    'general.middleware.etag_middleware.ETagIfModifiedSinceMiddleware',
 ]
 
 ROOT_URLCONF = 'sapp.urls'

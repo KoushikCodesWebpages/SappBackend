@@ -70,6 +70,7 @@ class SOProfileSerializer(serializers.ModelSerializer):
     
 
 
+
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceLock
@@ -113,6 +114,9 @@ class AttendanceSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+
+
+
 class AnnouncementMainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Announcement
@@ -134,15 +138,23 @@ class AnnouncementDetailedSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
 
+
+
 class CalendarEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalendarEvent
         fields = '__all__'
 
+
+
+
 class TimetableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Timetable
         fields = '__all__'
+
+
+
 
 class ResultLockSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(read_only=True)  # Include computed field
@@ -152,33 +164,20 @@ class ResultLockSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'start_date', 'end_date','last_updated', 'is_active']  # Added `is_active`
 
 class ResultSerializer(serializers.ModelSerializer):
+    percentage = serializers.ReadOnlyField(source='percentage')  # Directly use model method
+
     class Meta:
         model = Result
-        fields = ['id', 'student','test_name', 'subject', 'marks', 'total_marks', 'grade', 'result_lock']
-        
+        fields = ['id', 'result_lock', 'student', 'subject', 'marks', 'percentage', 'created_by']
 
     def validate(self, data):
-        """
-        Validate that:
-        1. The result is being added during the active result lock period.
-        2. Marks do not exceed total marks.
-        3. Grade is calculated based on marks and total marks.
-        """
-        result_lock = data.get('result_lock')
-        marks = data.get('marks')
-        total_marks = data.get('total_marks')
-        grade = data.get('grade')
-
-        # Validate result lock period
-        if result_lock and not result_lock.is_active():
-            raise serializers.ValidationError("Results can only be added during the active result lock period. IN case the marks have to be changed, contact School Office.")
-
-        # Validate marks and total marks
-        if marks and total_marks:
-            if marks > total_marks:
-                raise serializers.ValidationError("Marks cannot exceed total marks. Kindly Put appropriate marks!")
+        """Use model's `clean()` method for validation instead of duplicating logic."""
+        instance = Result(**data)  # Create an unsaved instance
+        instance.clean()  # Call model's validation logic
+        return data
             
             
+  
             
 class AssignmentMinSerializer(serializers.ModelSerializer):
     class Meta:
@@ -192,6 +191,8 @@ class AssignmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['faculty']
         
         
+
+
         
 class SubmissionMinSerializer(serializers.ModelSerializer):
     class Meta:
@@ -202,6 +203,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = '__all__'
+   
+   
         
 class PortionSerializer(serializers.ModelSerializer):
     class Meta:

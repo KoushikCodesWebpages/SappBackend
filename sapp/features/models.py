@@ -75,8 +75,6 @@ class CalendarEvent(models.Model):
     def __str__(self):
         return f"{self.title} ({self.event_date})"
 
-import uuid
-from django.db import models
 
 class Timetable(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -120,31 +118,42 @@ class ResultLock(models.Model):
         return self.start_date <= today <= self.end_date
 
     
-    
+
 class Result(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(
-        Student, 
+        'accounts.Student', 
         on_delete=models.CASCADE, 
-        related_name='results', 
-        to_field='student_code')
-    # Link to the Student model
-    test_name = models.CharField(max_length=100, unique=True)
-    subject = models.CharField(max_length=100)  # Subject for which the result is recorded
-    marks = models.PositiveIntegerField()  # Marks obtained by the student
-    total_marks = models.PositiveIntegerField()
-    grade = models.CharField(max_length=5)
+        related_name='results',
+        db_index=True
+    )
     result_lock = models.ForeignKey(
         'ResultLock',
         on_delete=models.CASCADE,
         related_name='results',
-        to_field='title'  # Use the 'title' field as the reference
-    )  # Link to the ResultLock model
-    created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)  
-    updated_at = models.DateTimeField(auto_now=True) 
+        to_field='title',
+        db_index=True
+    )   # Link to the ResultLock model
+    
+    subject = models.CharField(max_length=100)  # Subject for which the result is recorded
+    marks = models.JSONField()  # Marks obtained by the student
+    
+    created_by = models.CharField(max_length=255, editable=False)  # Auto-set to the editor
+    last_updated = models.DateTimeField(auto_now=True)  
+
+    class Meta:
+        unique_together = ('student', 'result_lock')
+        indexes = [
+            models.Index(fields=['student', 'result_lock']),
+            models.Index(fields=['last_updated']),
+        ]
+    
+    def percentage(self):
+        """Compute percentage dynamically from the JSON field."""
+        return round((self.marks["obtained"] / self.marks["total"]) * 100, 2) if self.marks.get("total") else 0
 
     def __str__(self):
-        return f"{self.student.user.username} - {self.subject} ({self.marks})"
+        return f"{self.student} - {self.result_lock.title} ({self.marks['obtained']}/{self.marks['total']})"
 
     def clean(self):
         """Validate that the result is being added within the active result lock period."""
@@ -152,9 +161,12 @@ class Result(models.Model):
             raise ValidationError("Results can only be added during the active result lock period.")
 
     def save(self, *args, **kwargs):
-        """Override the save method to enforce validation."""
-        self.clean()  # Run validation before saving
+        """Override save to set created_by dynamically."""
+        user = kwargs.pop('user', None)  # Extract user if passed from the view
+        if not self.pk and user:  # Only set on creation
+            self.created_by = user.username
         super().save(*args, **kwargs)
+
 
 
 class Assignment(models.Model):

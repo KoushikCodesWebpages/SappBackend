@@ -2,14 +2,6 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from django.utils.http import http_date
-from django.http import HttpResponseNotModified
-from django.utils.timezone import is_naive, make_aware
-from django.utils.http import parse_http_date_safe, http_date
-from django.http import HttpResponseNotModified
-from django.utils.timezone import make_aware, is_naive
-from datetime import datetime, timezone
-import math
 
 from features.models import Result, ResultLock
 from features.serializers import ResultSerializer, ResultLockSerializer
@@ -21,70 +13,14 @@ class ResultLockView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == "POST":
-            return [IsAuthenticated(), IsOfficeAdmin()]
-        return [IsAuthenticated(), permissions.OR(IsFaculty(), IsOfficeAdmin())]  
+            return [permissions.IsAuthenticated(), IsOfficeAdmin()]
+        return [permissions.IsAuthenticated(), permissions.OR(IsFaculty(), IsOfficeAdmin())]  
 
     def get_queryset(self):
-        last_modified = self.request.headers.get("If-Modified-Since")
-
-        if not last_modified:
-            print("⚠️ No If-Modified-Since header received. Returning all data.")
-            return ResultLock.objects.all()
-
-        print(f"✅ Received If-Modified-Since header (raw): {last_modified}")
-
-        try:
-            timestamp = parse_http_date_safe(last_modified)
-
-            if timestamp is None:
-                print(f"❌ Failed to parse If-Modified-Since: {last_modified}")
-                return ResultLock.objects.all()
-
-            timestamp_dt = datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
-            
-            # Fix 1: Remove microsecond errors
-            timestamp_seconds = math.floor(timestamp_dt.timestamp())  # Floor to seconds
-            timestamp_dt = datetime.utcfromtimestamp(timestamp_seconds).replace(tzinfo=timezone.utc)
-
-            print(f"🔍 Filtering for updates after: {timestamp_dt}")
-
-            queryset = ResultLock.objects.filter(last_updated__gt=timestamp_dt)
-            print(f"🔍 Filtered Queryset Count: {queryset.count()}")
-
-            return queryset  
-
-        except Exception as e:
-            print(f"❌ Error processing If-Modified-Since: {e}")
-            return ResultLock.objects.all()  
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        
-        if not queryset.exists():
-            print("✅ No new data → Returning 304 Not Modified")
-            return HttpResponseNotModified()
-
-        serializer = self.get_serializer(queryset, many=True)
-        last_updated = queryset.order_by("-last_updated").first().last_updated  
-
-        if is_naive(last_updated):
-            last_updated = make_aware(last_updated)
-
-        # Fix 2: Use milliseconds to avoid floating-point mismatches
-        etag_value = f'"{int(last_updated.timestamp() * 1000)}"'  
-
-        client_etag = request.headers.get("If-None-Match")
-        print(f"📌 Received If-None-Match: {client_etag}, Calculated ETag: {etag_value}")
-
-        if client_etag == etag_value:
-            print("✅ ETag matched → Returning 304 Not Modified")
-            return HttpResponseNotModified()
-
-        response = Response(serializer.data, status=status.HTTP_200_OK)
-        response["Last-Modified"] = http_date(last_updated.timestamp())  
-        response["ETag"] = etag_value  
-
-        return response
+        """
+        Since ETag and If-Modified-Since are handled by middleware, we simply return the queryset.
+        """
+        return ResultLock.objects.all().order_by('last_updated')
 
 class ResultLockDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
