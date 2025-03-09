@@ -52,8 +52,8 @@ urlpatterns = [
     path('class/attendance/<str:student_code>/', AttendanceView.as_view(), name='attendance-detail'),
     
     #resultlock
-    path('result-locks/', ResultLockView.as_view(), name='result-lock-list'),
-    path('result-locks/<int:pk>/', ResultLockDetailView.as_view(), name='result-lock-detail'),
+    path('office/resultlock/', ResultLockView.as_view(), name='result-lock-list'),
+    path('office/resultlock/<int:pk>/', ResultLockDetailView.as_view(), name='result-lock-detail'),
     
     #results
     path('results/', ResultAPIView.as_view(), name='result-list'),

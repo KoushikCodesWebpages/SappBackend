@@ -4,8 +4,8 @@ import subprocess
 
 # Define paths
 paths_to_clean = [
-    "sapp/accounts/migrations",
-    "sapp/features/migrations"
+    "accounts/migrations",
+    "features/migrations"
 ]
 
 # Files and directories to exclude
@@ -26,7 +26,7 @@ def clean_migrations():
 
 def delete_db():
     """Delete the SQLite database file."""
-    db_path = "db.sqlite3"
+    db_path = os.path.join(os.path.dirname(__file__), "db.sqlite3")
     if os.path.exists(db_path):
         os.remove(db_path)
         print(f"✅ Deleted: {db_path}")
@@ -36,9 +36,9 @@ def delete_db():
 def run_django_commands():
     """Run Django migration and server commands."""
     commands = [
-        ["python", "sapp/manage.py", "makemigrations"],
-        ["python", "sapp/manage.py", "migrate"],
-        ["python", "sapp/manage.py", "runserver"]
+        ["python", "manage.py", "makemigrations"],
+        ["python", "manage.py", "migrate"],
+        ["python", "manage.py", "runserver"]
     ]
     
     for command in commands:
