@@ -36,6 +36,7 @@ class Student(models.Model):
         
     def __str__(self):
         return f"Student: {self.user.username} ({self.academic_year})"
+    last_updated = models.DateTimeField(auto_now=True)
 
 
 class Faculty(models.Model):
@@ -46,6 +47,7 @@ class Faculty(models.Model):
     coverage = models.JSONField(default=list)  # Updated from 'subjects'
     class_teacher = models.JSONField(default=dict, blank=True)
     image = models.ImageField(upload_to='faculty/pics/', blank=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Faculty: {self.user.username}"
@@ -74,5 +76,6 @@ class SOAdmin(models.Model):
     employee_id = models.CharField(max_length=50,blank=True, null=True)
     school_name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='office/pics/', blank=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     

@@ -9,6 +9,7 @@ class Attendance(models.Model):
     date = models.DateField()
     student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=[('present', 'Present'), ('absent', 'Absent')])
+    last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('student', 'date')
@@ -21,7 +22,7 @@ class AttendanceLock(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField()
     is_locked = models.BooleanField(default=False)
-
+    last_updated = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together = ('id', 'date')
 
@@ -39,9 +40,7 @@ class Announcement(models.Model):
     timings = models.CharField(max_length=100)
     offline_or_online = models.CharField(max_length=50, choices=(('Offline', 'Offline'), ('Online', 'Online')))
     till = models.DateTimeField()
-    created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  
+    last_updated = models.DateTimeField(auto_now=True) 
 
     # Methods
     @classmethod
@@ -51,9 +50,6 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
-
-    class Meta:
-        ordering = ['-created_at']
 
 class CalendarEvent(models.Model):
     # Fields
@@ -68,9 +64,7 @@ class CalendarEvent(models.Model):
         ]
     )  # Type of event
     event_date = models.DateField()  # Date of the event
-    created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)  # When the event was created
-    updated_at = models.DateTimeField(auto_now=True)  # When the event was last updated
+    last_updated = models.DateTimeField(auto_now=True)  # When the event was last updated
 
     def __str__(self):
         return f"{self.title} ({self.event_date})"
@@ -82,9 +76,7 @@ class Timetable(models.Model):
     standard = models.CharField(max_length=20)  # E.g., "7", "10"
     section = models.CharField(max_length=5)  # E.g., "A", "B"
     faculty_name = models.CharField(max_length=255)  # Assigned teacher
-    created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)  
-    updated_at = models.DateTimeField(auto_now=True)  
+    created_by = models.CharField(max_length=255)  # Admin's username or email  
 
     # Fields for each weekday containing lists of subjects/periods
     monday = models.JSONField(default=list)  
@@ -125,6 +117,7 @@ class Result(models.Model):
         'accounts.Student', 
         on_delete=models.CASCADE, 
         related_name='results',
+        to_field='student_code',
         db_index=True
     )
     result_lock = models.ForeignKey(
@@ -137,8 +130,7 @@ class Result(models.Model):
     
     subject = models.CharField(max_length=100)  # Subject for which the result is recorded
     marks = models.JSONField()  # Marks obtained by the student
-    
-    created_by = models.CharField(max_length=255, editable=False)  # Auto-set to the editor
+    # Auto-set to the editor
     last_updated = models.DateTimeField(auto_now=True)  
 
     class Meta:
@@ -157,7 +149,7 @@ class Result(models.Model):
 
     def clean(self):
         """Validate that the result is being added within the active result lock period."""
-        if not self.result_lock.is_active():
+        if not self.result_lock.is_active:
             raise ValidationError("Results can only be added during the active result lock period.")
 
     def save(self, *args, **kwargs):
@@ -172,7 +164,6 @@ class Result(models.Model):
 class Assignment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for assignment
     title = models.CharField(max_length=255)
-    description = models.TextField()
     subject = models.CharField(max_length=255)
     mark = models.IntegerField(null=True, blank=True)  # Mark/grade for the assignment
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments', to_field='faculty_id')
@@ -181,9 +172,7 @@ class Assignment(models.Model):
     section = models.CharField(max_length=100)
     academic_year = models.CharField(max_length=20)
     completed = models.BooleanField(default=False)  # Flag for completed assignment
-    created_by = models.CharField(max_length=255)  # Admin's username or email
-    created_at = models.DateTimeField(auto_now_add=True)  
-    updated_at = models.DateTimeField(auto_now=True) 
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
@@ -199,7 +188,7 @@ class Submission(models.Model):
     description = models.TextField(null=True, blank=True)
     mark = models.IntegerField(null=True, blank=True)  # Individual mark for the submission
     feedback = models.TextField(null=True, blank=True)  # Feedback from the faculty
-    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Submission by {self.student} for {self.assignment.title}"
@@ -222,8 +211,7 @@ class Portion(models.Model):
     description = models.TextField(blank=True, help_text="Detailed description of the portion")
     reference = models.CharField(max_length=255, help_text="Reference information")
     
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.standard} - {self.subject} - {', '.join(self.unit)} - {', '.join(self.title)}"

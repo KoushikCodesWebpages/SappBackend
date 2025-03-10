@@ -12,7 +12,7 @@ from features.veiws.announcements import AnnouncementView,AnnouncementMainDispla
 from features.veiws.calendar import CalendarEventView
 from features.veiws.assignments import AssignmentView, SubmissionView
 from features.veiws.timetable import TimetableView
-from features.veiws.results import ResultLockView, ResultAPIView,ResultLockDetailView
+from features.veiws.results import ResultLockView,ResultLockDetailView, StudentResultAPIView, FacultyResultView
 from features.veiws.defaults import AdminDashboardAPIView, FilterStudentsView
 
 
@@ -56,8 +56,11 @@ urlpatterns = [
     path('office/resultlock/<int:pk>/', ResultLockDetailView.as_view(), name='result-lock-detail'),
     
     #results
-    path('results/', ResultAPIView.as_view(), name='result-list'),
-    path('results/<int:pk>/', ResultAPIView.as_view(), name='result-detail'),
+    
+    path("student/results/", StudentResultAPIView.as_view(), name="student-results"),
+
+    path("faculty/results/", FacultyResultView.as_view(), name="faculty-results"),
+    path("faculty/results/<int:pk>/", FacultyResultView.as_view(), name="faculty-result-detail"),
 
     
     #announcement

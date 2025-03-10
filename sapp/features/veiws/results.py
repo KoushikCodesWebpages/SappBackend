@@ -1,7 +1,7 @@
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
+from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
+from django.db.models import Q
+from rest_framework import serializers
 
 from features.models import Result, ResultLock
 from features.serializers import ResultSerializer, ResultLockSerializer
@@ -39,99 +39,63 @@ class ResultLockDetailView(generics.RetrieveUpdateDestroyAPIView):
         return [permissions.IsAuthenticated()]
 
 
+class StudentResultAPIView(generics.ListAPIView):
+    """
+    API for students to retrieve their own results.
+    """
+    serializer_class = ResultSerializer
+    permission_classes = [IsAuthenticated, IsStudent]
 
-class ResultAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            # Allow students and faculty to view results
-            return [IsAuthenticated(), (IsStudent | IsFaculty | IsOfficeAdmin)()]
-        elif self.request.method in ['POST', 'PUT', 'PATCH']:
-            # Only faculty and school admins can create or update results
-            return [IsAuthenticated(), (IsFaculty | IsOfficeAdmin)()]
-        return super().get_permissions()
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if user.groups.filter(name='student').exists():
-            # Students can only view their own results
-            results = Result.objects.filter(student__user=user)
-        else:
-            # Faculty and school admins can view all results
-            results = Result.objects.all()
-        serializer = ResultSerializer(results, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        serializer = ResultSerializer(data=request.data)
-
-        if serializer.is_valid():
-            # Check if the result lock is active (for faculty)
-            if user.groups.filter(name='faculty').exists():
-                result_lock = serializer.validated_data.get('result_lock')
-                if not result_lock.is_active():
-                    return Response(
-                        {"detail": "Results can only be added during the active result lock period."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, pk, *args, **kwargs):
-        user = request.user
-        try:
-            result = Result.objects.get(pk=pk)
-        except Result.DoesNotExist:
-            return Response(
-                {"detail": "Result not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        serializer = ResultSerializer(result, data=request.data, partial=False)
-
-        if serializer.is_valid():
-            # Check if the result lock is active (for faculty)
-            if user.groups.filter(name='faculty').exists():
-                result_lock = serializer.validated_data.get('result_lock')
-                if not result_lock.is_active():
-                    return Response(
-                        {"detail": "Results can only be updated during the active result lock period."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, pk, *args, **kwargs):
-        user = request.user
-        try:
-            result = Result.objects.get(pk=pk)
-        except Result.DoesNotExist:
-            return Response(
-                {"detail": "Result not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        serializer = ResultSerializer(result, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            # Check if the result lock is active (for faculty)
-            if user.groups.filter(name='faculty').exists():
-                result_lock = serializer.validated_data.get('result_lock')
-                if not result_lock.is_active():
-                    return Response(
-                        {"detail": "Results can only be updated during the active result lock period."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        return Result.objects.filter(student__user=self.request.user)
     
+
+class FacultyResultView(generics.ListCreateAPIView,generics.RetrieveUpdateDestroyAPIView):
+    """
+    API for faculty to manage results.
+    - GET: Retrieve results (filtered dynamically by any field)
+    - POST: Create new results (only during active result lock)
+    - PUT/PATCH: Update results (only during active result lock)
+    - DELETE: Delete results
+    """
+    serializer_class = ResultSerializer
+    permission_classes = [IsAuthenticated, IsFaculty]
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        """Dynamically filters results based on any query parameter."""
+        queryset = Result.objects.all()
+        query_params = self.request.query_params
+
+        filters = Q()
+        for field, value in query_params.items():
+            if hasattr(Result, field) or field.startswith("student__"):  # Ensures field exists
+                filters &= Q(**{field: value})
+
+        return queryset.filter(filters)
+
+    def perform_create(self, serializer):
+        """Checks result lock before creating results."""
+        self._validate_result_lock(serializer)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """Checks result lock before updating results."""
+        self._validate_result_lock(serializer)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """Allows deletion of results (only for faculty & admin)."""
+        instance.delete()
+
+    def _validate_result_lock(self, serializer):
+        """Validates if result modifications are allowed."""
+        user = self.request.user
+        if user.groups.filter(name="faculty").exists():
+            result_lock = serializer.validated_data.get("result_lock")
+            if not result_lock.is_active():
+                raise serializers.ValidationError(
+                    {"detail": "Results can only be modified during the active result lock period."}
+                )
 
 

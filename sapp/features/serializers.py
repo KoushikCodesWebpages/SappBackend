@@ -10,7 +10,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','image']
+        fields = ['user', 'enrollment_number', 'standard', 'section', 'subjects','academic_year', 'attendance_percent','image','last_updated','student_code']
 
     def update(self, instance, validated_data):
         # Handle user update (username, email)
@@ -35,7 +35,7 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Faculty
-        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image']
+        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image','last_updated']
     
     def update(self, instance, validated_data):
         # Handle user update (username, email)
@@ -54,7 +54,7 @@ class SOProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SOAdmin
-        fields = ['user','employee_id','school_name','image']
+        fields = ['user','employee_id','school_name','image','last_updated']
     
     def update(self, instance, validated_data):
         # Handle user update (username, email)
@@ -74,14 +74,14 @@ class SOProfileSerializer(serializers.ModelSerializer):
 class AttendanceLockSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceLock
-        fields = ['id', 'date', 'is_locked']
+        fields = ['id', 'date', 'is_locked','last_updated']
         
 class AttendanceSerializer(serializers.ModelSerializer):
     student = serializers.CharField(source='student.student_code')  # Display student_code in the response
 
     class Meta:
         model = Attendance
-        fields = ['id', 'student', 'date', 'status']
+        fields = ['id', 'student', 'date', 'status','last_updated']
 
     def create(self, validated_data):
         # Extract the student_code from the validated data
@@ -120,7 +120,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
 class AnnouncementMainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Announcement
-        fields = ['id', 'title', 'date', 'timings']
+        fields = ['id', 'title', 'date', 'timings','last_updated']
         
 class AnnouncementDetailedSerializer(serializers.ModelSerializer):
     class Meta:
@@ -133,9 +133,7 @@ class AnnouncementDetailedSerializer(serializers.ModelSerializer):
             'timings',
             'offline_or_online',
             'till',
-            'created_by',
-            'created_at',
-            'updated_at'
+            'last_updated'
         ]
 
 
@@ -164,17 +162,19 @@ class ResultLockSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'start_date', 'end_date','last_updated', 'is_active']  # Added `is_active`
 
 class ResultSerializer(serializers.ModelSerializer):
-    percentage = serializers.ReadOnlyField(source='percentage')  # Directly use model method
+    percentage = serializers.ReadOnlyField()  # Directly use model method
 
     class Meta:
         model = Result
-        fields = ['id', 'result_lock', 'student', 'subject', 'marks', 'percentage', 'created_by']
+        fields = ['id', 'result_lock', 'student', 'subject', 'marks', 'percentage','last_updated']
 
     def validate(self, data):
         """Use model's `clean()` method for validation instead of duplicating logic."""
         instance = Result(**data)  # Create an unsaved instance
         instance.clean()  # Call model's validation logic
         return data
+    def get_percentage(self, obj):
+        return obj.percentage()
             
             
   
@@ -182,7 +182,7 @@ class ResultSerializer(serializers.ModelSerializer):
 class AssignmentMinSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
-        fields = ['id', 'title','subject','completed','due_date']
+        fields = ['id', 'title','subject','completed','due_date','last_updated']
         
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -197,7 +197,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
 class SubmissionMinSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
-        fields = ['id', 'assignment_title', 'student', 'mark']
+        fields = ['id', 'assignment_title', 'student', 'mark','last_updated']
         
 class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:

@@ -21,20 +21,20 @@ class StudentSerializer(serializers.ModelSerializer):
     user = AuthUserSerializer()
     class Meta:
         model = Student
-        fields = ['user', 'enrollment_number', 'standard', 'section','academic_year', 'subjects', 'attendance_percent','image','student_code']
+        fields = ['user', 'enrollment_number', 'standard', 'section','academic_year', 'subjects', 'attendance_percent','image','student_code','last_updated']
 
 # Faculty Serializer
 class FacultySerializer(serializers.ModelSerializer):
     user = AuthUserSerializer()
     class Meta:
         model = Faculty
-        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image']
+        fields = ['user', 'faculty_id', 'department', 'specialization', 'coverage', 'class_teacher','image','last_updated']
         
 class OfficeAdminSerializer(serializers.ModelSerializer):
     user = AuthUserSerializer()
     class Meta:
         model = SOAdmin
-        fields = ['user','employee_id','school_name','image']
+        fields = ['user','employee_id','school_name','image','last_updated']
         
 class ExcelUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
