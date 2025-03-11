@@ -10,9 +10,10 @@ from features.veiws.profile import StudentProfileView, SOProfileView, FacultyPro
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
 from features.veiws.calendar import CalendarEventView
-from features.veiws.assignments import AssignmentView, SubmissionView
+from features.veiws.assignments import AssignmentView
+from features.veiws.submissions import FacultySubmissionViewSet,StudentSubmissionViewSet
 from features.veiws.timetable import TimetableView
-from features.veiws.results import ResultLockView,ResultLockDetailView, StudentResultAPIView, FacultyResultView
+from features.veiws.results import ResultLockView,ResultLockDetailView, StudentResultAPIView, FacultyResultView 
 from features.veiws.defaults import AdminDashboardAPIView, FilterStudentsView
 
 
@@ -79,8 +80,9 @@ urlpatterns = [
     path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
      path('faculty/assignments/<uuid:assignment_id>/', AssignmentView.as_view(), name='assignment_delete'),
     #submissions
-    path('students/submissions/', SubmissionView.as_view(), name='submission-list'),
-    path('students/submissions/<uuid:assignment_id>', SubmissionView.as_view(), name='submission-list'),
+    path('faculty/submissions/',FacultySubmissionViewSet.as_view(), name= 'faculty-submisson-list'),
+    path('students/submissions/', StudentSubmissionViewSet.as_view(), name='submission-list'),
+    path('students/submissions/<uuid:assignment_id>', StudentSubmissionViewSet.as_view(), name='submission-list'),
      
      
      

@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 class Attendance(models.Model):
     date = models.DateField()
-    student = models.ForeignKey(Student, related_name='attendance', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, related_name='attendance',to_field='student_code', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=[('present', 'Present'), ('absent', 'Absent')])
     last_updated = models.DateTimeField(auto_now=True)
 
@@ -160,45 +160,65 @@ class Result(models.Model):
         super().save(*args, **kwargs)
 
 
-
 class Assignment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for assignment
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
-    mark = models.IntegerField(null=True, blank=True)  # Mark/grade for the assignment
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='assignments', to_field='faculty_id')
+    mark = models.PositiveIntegerField(null=True, blank=True)  # Prevents negative marks
+    faculty = models.ForeignKey(
+        Faculty, on_delete=models.CASCADE, related_name='assignments', to_field='faculty_id'
+    )
     due_date = models.DateTimeField(null=True, blank=True)
-    standard = models.CharField(max_length=100)
-    section = models.CharField(max_length=100)
-    academic_year = models.CharField(max_length=20)
-    completed = models.BooleanField(default=False)  # Flag for completed assignment
+    
+    image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
+    document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)
+    
+    standard = models.CharField(max_length=100, db_index=True)
+    section = models.CharField(max_length=100, db_index=True)
+    academic_year = models.CharField(max_length=20, db_index=True)
+    
+    completed = models.BooleanField(default=False, db_index=True)  
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
 
-# Model for Submissions
 class Submission(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # Unique identifier for submission
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='submissions')  # assuming Student model
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    assignment = models.ForeignKey(
+        Assignment, 
+        on_delete=models.CASCADE, 
+        related_name='submissions',
+        to_field='id'
+    )
+    student = models.ForeignKey(
+        Student, 
+        on_delete=models.CASCADE, 
+        related_name='submissions',
+        to_field='student_code'  # Assuming Student model has `student_code` as a unique identifier
+    )
     image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
     document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    mark = models.IntegerField(null=True, blank=True)  # Individual mark for the submission
-    feedback = models.TextField(null=True, blank=True)  # Feedback from the faculty
+    
+    mark = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Submission by {self.student} for {self.assignment.title}"
+        return f"Submission by {self.student_id} for {self.assignment_id}"
 
     def save(self, *args, **kwargs):
-        # Check if all submissions are made, if so, mark the assignment as completed
+        is_new = self._state.adding  # Check if the submission is new
         super().save(*args, **kwargs)
-        if self.assignment.submissions.count() == self.assignment.faculty.students.count():
-            self.assignment.completed = True
-            self.assignment.save()
+
+        if is_new:
+            total_students = self.assignment.faculty.students.count()
+            submitted_students = self.assignment.submissions.values('student').distinct().count()
+            if submitted_students >= total_students:
+                Assignment.objects.filter(id=self.assignment.id).update(completed=True)
+
+
             
             
 class Portion(models.Model):
