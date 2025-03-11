@@ -23,6 +23,9 @@ router.register('studentslist', StudentViewSet)
 router.register('facultylist', FacultyViewSet)
 router.register('soadminlist', OfficeAdminViewSet)
 
+router.register(r'student/submissions', StudentSubmissionViewSet, basename='student-submission')
+router.register(r'faculty/submissions', FacultySubmissionViewSet, basename='faculty-submission')
+
 
 urlpatterns = [
     # Admin panel
@@ -80,9 +83,18 @@ urlpatterns = [
     path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
      path('faculty/assignments/<uuid:assignment_id>/', AssignmentView.as_view(), name='assignment_delete'),
     #submissions
-    path('faculty/submissions/',FacultySubmissionViewSet.as_view(), name= 'faculty-submisson-list'),
-    path('students/submissions/', StudentSubmissionViewSet.as_view(), name='submission-list'),
-    path('students/submissions/<uuid:assignment_id>', StudentSubmissionViewSet.as_view(), name='submission-list'),
+     path('students/submissions/', 
+         StudentSubmissionViewSet.as_view({'get': 'list', 'post': 'create'}), 
+         name='student-submission-list'),
+
+    path('students/submissions/<uuid:pk>/',  
+         StudentSubmissionViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), 
+         name='student-submission-detail'),
+
+    # Faculty Submission API
+    path('faculty/submissions/', 
+         FacultySubmissionViewSet.as_view({'get': 'list'}), 
+         name='faculty-submission-list'),
      
      
      
