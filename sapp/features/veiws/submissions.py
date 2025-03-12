@@ -20,6 +20,7 @@ class StudentSubmissionViewSet(viewsets.ModelViewSet):
     API for students to manage their own submissions.
     """
     permission_classes = [IsAuthenticated, IsStudent]
+    pagination_class = None
 
     def get_queryset(self):
         """
@@ -51,6 +52,7 @@ class FacultySubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     API for faculty to view all submissions for a specific assignment.
     """
     permission_classes = [IsAuthenticated, IsFaculty]
+    pagination_class = None
     serializer_class = SubmissionSerializer  # Faculty only needs minimal details
 
     def get_queryset(self):

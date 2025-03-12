@@ -200,15 +200,17 @@ class SubmissionMinSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = ['id', 'assignment_title', 'student', 'mark', 'last_updated']
+        read_only_fields = ['student']
         
 class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
-        fields = ['id','assignment_title','student','image','document','mark','created_at']
+        fields = ['id','assignment_title','student','image','document','mark','last_updated']
+        read_only_fields = ['student']
    
    
         
 class PortionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portion
-        fields = '__all__'
+        fields = ['id','standard','academic_year','subject','unit','title','description','reference','image','document','last_updated']

@@ -10,6 +10,7 @@ from general.utils.permissions import IsFaculty, IsStudent, IsOfficeAdmin
 class ResultLockView(generics.ListCreateAPIView):
     queryset = ResultLock.objects.all()
     serializer_class = ResultLockSerializer
+    pagination_class = None
 
     def get_permissions(self):
         if self.request.method == "POST":
@@ -31,6 +32,7 @@ class ResultLockDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = ResultLock.objects.all()
     serializer_class = ResultLockSerializer
+    pagination_class = None
 
     def get_permissions(self):
         """Restrict modification to `OfficeAdmin`, allow all authenticated users to view."""
@@ -45,6 +47,7 @@ class StudentResultAPIView(generics.ListAPIView):
     """
     serializer_class = ResultSerializer
     permission_classes = [IsAuthenticated, IsStudent]
+    pagination_class = None
 
     def get_queryset(self):
         return Result.objects.filter(student__user=self.request.user)
@@ -60,6 +63,7 @@ class FacultyResultView(generics.ListCreateAPIView,generics.RetrieveUpdateDestro
     """
     serializer_class = ResultSerializer
     permission_classes = [IsAuthenticated, IsFaculty]
+    pagination_class = None
     lookup_field = 'pk'
 
     def get_queryset(self):
