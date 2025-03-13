@@ -193,20 +193,14 @@ class AssignmentSerializer(serializers.ModelSerializer):
         
 
 
-        
-class SubmissionMinSerializer(serializers.ModelSerializer):
-    assignment_title = serializers.CharField(source='assignment.title', read_only=True)  # Fetches title from related Assignment
-
-    class Meta:
-        model = Submission
-        fields = ['id', 'assignment_title', 'student', 'mark', 'last_updated']
-        read_only_fields = ['student']
-        
-class SubmissionSerializer(serializers.ModelSerializer):
+class StudentSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = ['id','assignment_title','student','image','document','mark','last_updated']
         read_only_fields = ['student']
+        
+
+
    
    
         

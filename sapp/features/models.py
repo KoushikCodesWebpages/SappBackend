@@ -195,10 +195,11 @@ class Submission(models.Model):
         to_field='id'
     )
     student = models.ForeignKey(
-        Student, 
+        'accounts.Student', 
         on_delete=models.CASCADE, 
         related_name='submissions',
-        to_field='student_code'  # Assuming Student model has `student_code` as a unique identifier
+        to_field='student_code',
+        db_index=True
     )
     image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
     document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)

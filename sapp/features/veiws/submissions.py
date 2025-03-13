@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from general.utils.permissions import IsFaculty
 from features.models import Submission
-from features.serializers import SubmissionSerializer, SubmissionMinSerializer
+from features.serializers import StudentSubmissionSerializer
 from general.utils.permissions import IsFaculty, IsStudent
 
 
@@ -21,6 +21,7 @@ class StudentSubmissionViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [IsAuthenticated, IsStudent]
     pagination_class = None
+    lookup_field = "id"
 
     def get_queryset(self):
         """
@@ -53,7 +54,8 @@ class FacultySubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     permission_classes = [IsAuthenticated, IsFaculty]
     pagination_class = None
-    serializer_class = SubmissionSerializer  # Faculty only needs minimal details
+    serializer_class = StudentSubmissionSerializer 
+    lookup_field = "id"
 
     def get_queryset(self):
         """

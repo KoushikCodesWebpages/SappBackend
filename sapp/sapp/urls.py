@@ -10,7 +10,7 @@ from features.veiws.profile import StudentProfileView, SOProfileView, FacultyPro
 from features.veiws.attendance import AttendanceLockView,AttendanceDaysView, AttendanceView
 from features.veiws.announcements import AnnouncementView,AnnouncementMainDisplayView
 from features.veiws.calendar import CalendarEventView
-from features.veiws.assignments import AssignmentView
+from features.veiws.assignments import AssignmentViewSet
 from features.veiws.submissions import FacultySubmissionViewSet,StudentSubmissionViewSet
 from features.veiws.timetable import TimetableView
 from features.veiws.results import ResultLockView,ResultLockDetailView, StudentResultAPIView, FacultyResultView 
@@ -23,6 +23,9 @@ router = routers.DefaultRouter()
 router.register('studentslist', StudentViewSet)
 router.register('facultylist', FacultyViewSet)
 router.register('soadminlist', OfficeAdminViewSet)
+
+#assignments
+router.register(r"faculty/assignments", AssignmentViewSet, basename="assignment")
 
 #submissions
 router.register(r'student/submissions', StudentSubmissionViewSet, basename='student-submission')
@@ -85,11 +88,9 @@ urlpatterns = [
      path('office/timetables/<uuid:pk>/', TimetableView.as_view(), name='timetable-detail'),  # For retrieve, update, and delete
     
     #assignments
-     path('faculty/assignments/', AssignmentView.as_view(), name='assignment-list'),
-     path('faculty/assignments/<uuid:assignment_id>/', AssignmentView.as_view(), name='assignment_delete'),
-     
+     #registered
     #submissions
-    #registered
+     #registered
     
     #portions
      

@@ -43,7 +43,7 @@ class CalendarEventView(APIView):
     def post(self, request):
         serializer = CalendarEventSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user.username)  # Log the admin creating the announcement
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
