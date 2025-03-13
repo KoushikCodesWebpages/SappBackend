@@ -49,7 +49,7 @@ class AnnouncementView(APIView):
         # The permission check is already handled dynamically in get_permissions(), so no need to check here
         serializer = AnnouncementDetailedSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(created_by=request.user.username)  # Log the admin creating the announcement
+            serializer.save()  # Log the admin creating the announcement
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
