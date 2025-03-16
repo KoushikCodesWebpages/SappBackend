@@ -77,6 +77,18 @@ class FacultyResultView(generics.ListCreateAPIView,generics.RetrieveUpdateDestro
                 filters &= Q(**{field: value})
 
         return queryset.filter(filters)
+    def create(self, request, *args, **kwargs):
+        """Handles bulk creation of results, ensuring result lock validation."""
+        if isinstance(request.data, list):
+            serializer = self.get_serializer(data=request.data, many=True)
+        else:
+            serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        self._validate_result_lock(serializer)
+
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         """Checks result lock before creating results."""
