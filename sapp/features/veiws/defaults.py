@@ -29,14 +29,14 @@ class FilterStudentsView(APIView):
     def get(self, request, *args, **kwargs):
         """Filter students based on standard and section."""
         # Get the standard and section from the request query parameters
-        standard_section = request.query_params.get('class', None)
+        standard_section_academicyear = request.query_params.get('class', None)
 
         # Validate the input
-        if not standard_section:
-            return Response({"error": "class parameter is required. Format: ['7', 'C']"},
+        if not standard_section_academicyear:
+            return Response({"error": "class parameter is required. Format: ['7', 'C', '2024-2025']"},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
-            standard, section = eval(standard_section)  # Safely parse the input list
+            standard, section, academic_year = eval(standard_section_academicyear)  # Safely parse the input list
             if not (isinstance(standard, str) and isinstance(section, str)):
                 raise ValueError
         except (ValueError, SyntaxError):
@@ -44,7 +44,7 @@ class FilterStudentsView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Query the students based on standard and section
-        students = Student.objects.filter(standard=standard, section=section).values('student_code', 'user__username')
+        students = Student.objects.filter(standard=standard, section=section,academic_year=academic_year).values('student_code', 'user__username')
         
         # Return the filtered students
         return Response(list(students), status=status.HTTP_200_OK)
