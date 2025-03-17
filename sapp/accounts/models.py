@@ -27,6 +27,7 @@ class Student(models.Model):
     student_code = models.CharField(max_length=100, unique=True, blank=True, null=True)
       # New field for academic year
     image = models.ImageField(upload_to='students/pics/', blank=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
         # Automatically generate the student_code before saving
@@ -36,7 +37,7 @@ class Student(models.Model):
         
     def __str__(self):
         return f"Student: {self.user.username} ({self.academic_year})"
-    last_updated = models.DateTimeField(auto_now=True)
+    
 
 
 class Faculty(models.Model):
