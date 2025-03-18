@@ -23,20 +23,24 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions dynamically for each action."""
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsFaculty()]  # Only faculty can modify
-        return [IsAuthenticated(), permissions.OR(IsFaculty(), IsStudent())]  # Faculty & students can view
+        if self.action in ["list", "retrieve"]:  # Only students can GET
+            return [IsAuthenticated()]  
+        return [IsAuthenticated(), IsFaculty()]  # Only faculty can modify
+
 
     def get_queryset(self):
         """Filter assignments by `section` and `standard`."""
         queryset = Assignment.objects.all()
-        section = self.request.query_params.get("section")
         standard = self.request.query_params.get("standard")
+        section = self.request.query_params.get("section")
+        academic_year = self.request.query_params.get("academic_year")
 
         if section:
             queryset = queryset.filter(section=section)
         if standard:
             queryset = queryset.filter(standard=standard)
+        if academic_year:
+            queryset = queryset.filter(academic_year=academic_year)
 
         return queryset
 

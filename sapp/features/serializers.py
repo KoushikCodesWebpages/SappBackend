@@ -193,10 +193,16 @@ class AssignmentSerializer(serializers.ModelSerializer):
         
 
 
-class StudentSubmissionSerializer(serializers.ModelSerializer):
+class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
-        fields = ['id','assignment_title','student','image','document','mark','last_updated']
+        fields = ['id','assignment','student','image','document','mark','last_updated']
+        read_only_fields = ['student']
+        
+class SubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = ['id','assignment','student','image','document','mark','last_updated']
         read_only_fields = ['student']
         
 

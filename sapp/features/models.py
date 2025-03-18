@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.timezone import now
 
+from django.conf import settings
 from accounts.models import Student, Faculty
 from django.core.exceptions import ValidationError
 
@@ -162,28 +163,35 @@ class Result(models.Model):
         super().save(*args, **kwargs)
 
 
+
+
 class Assignment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
-    mark = models.PositiveIntegerField(null=True, blank=True)  # Prevents negative marks
+
+    total_mark = models.PositiveIntegerField(null=True, blank=True)  # Prevents negative marks
     faculty = models.ForeignKey(
-        Faculty, on_delete=models.CASCADE, related_name='assignments', to_field='faculty_id'
+        'accounts.Faculty',  # Ensure Faculty model is correctly imported
+        on_delete=models.CASCADE,
+        related_name='assignments',
+        to_field='faculty_id'
     )
     due_date = models.DateTimeField(null=True, blank=True)
-    
+
     image = models.ImageField(upload_to='assignments/images/', null=True, blank=True)
     document = models.FileField(upload_to='assignments/docs/', null=True, blank=True)
-    
+
     standard = models.CharField(max_length=100, db_index=True)
     section = models.CharField(max_length=100, db_index=True)
     academic_year = models.CharField(max_length=20, db_index=True)
-    
+
     completed = models.BooleanField(default=False, db_index=True)  
+    created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} - {self.faculty.user.username}"
 
 
 class Submission(models.Model):
@@ -197,29 +205,42 @@ class Submission(models.Model):
     student = models.ForeignKey(
         'accounts.Student', 
         on_delete=models.CASCADE, 
-        related_name='submissions',
+        related_name='submissions',  # ✅ FIXED: Changed from 'student' to 'submissions'
         to_field='student_code',
         db_index=True
     )
     image = models.ImageField(upload_to='submissions/images/', null=True, blank=True)
     document = models.FileField(upload_to='submissions/docs/', null=True, blank=True)
-    
+
     mark = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Submission by {self.student_id} for {self.assignment_id}"
+        return f"Submission by {self.student.user.username} for {self.assignment.title}"
+
+    from accounts.models import Student  # Import Student model
 
     def save(self, *args, **kwargs):
-        is_new = self._state.adding  # Check if the submission is new
+        is_new = self._state.adding  # Check if this is a new submission
         super().save(*args, **kwargs)
 
         if is_new:
-            total_students = self.assignment.faculty.students.count()
+            # 🔹 Count students who belong to the same standard, section, and academic year as the assignment
+            total_students = Student.objects.filter(
+                standard=self.assignment.standard,
+                section=self.assignment.section,
+                academic_year=self.assignment.academic_year
+            ).count()
+
+            # 🔹 Count distinct students who have already submitted
             submitted_students = self.assignment.submissions.values('student').distinct().count()
-            if submitted_students >= total_students:
+
+            # 🔹 Mark assignment as completed if all students have submitted
+            if submitted_students >= total_students and total_students > 0:
                 Assignment.objects.filter(id=self.assignment.id).update(completed=True)
+
+
 
 
             
