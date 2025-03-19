@@ -6,7 +6,7 @@ from features.models import Submission,Assignment
 from features.serializers import SubmissionSerializer
 from general.utils.permissions import IsFaculty, IsStudent
 from accounts.models import Student
-
+from django.utils.timezone import now
 
 class StudentSubmissionViewSet(viewsets.ModelViewSet):
     """API for students to manage their own submissions."""
@@ -108,14 +108,17 @@ class FacultySubmissionViewSet(viewsets.ModelViewSet):
             academic_year=assignment.academic_year
         )
         not_submitted_students = total_students.exclude(student_code__in=submissions.values_list("student__student_code", flat=True))
-
+        
+        last_updated = submissions.order_by('-last_updated').values_list('last_updated', flat=True).first() or now()
+        
         return Response({
             "total_students": total_students.count(),
             "submitted_students_count": submitted_students_count,
             "not_submitted_students": [
                 {"name": s.user.username, "student_code": s.student_code} for s in not_submitted_students
             ],
-            "submissions": self.get_serializer(submissions, many=True).data
+            "submissions": self.get_serializer(submissions, many=True).data,
+            "last_updated": last_updated.isoformat()  # ✅ Add last_updated field
         })
 
 
